@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Warm Restaurant Color Palette */
+
+    /* Grey - warm neutral tones */
+    --color-grey-50: #FAF8F6;
+    --color-grey-100: #F5F1ED;
+    --color-grey-200: #E8E2DB;
+    --color-grey-300: #D5CCC2;
+    --color-grey-400: #B8ACA0;
+    --color-grey-500: #968A7D;
+    --color-grey-600: #756A5E;
+    --color-grey-700: #5A514A;
+    --color-grey-800: #443D38;
+    --color-grey-900: #2E2925;
+
+    /* Primary - Brown #5B3924 */
+    --color-primary-50: #F7F3F0;
+    --color-primary-100: #EDE5DE;
+    --color-primary-200: #DBCABD;
+    --color-primary-300: #C4A894;
+    --color-primary-400: #A97E5E;
+    --color-primary-500: #8B5E3C;
+    --color-primary-600: #5B3924;
+    --color-primary-700: #4A2E1D;
+    --color-primary-800: #3A2417;
+    --color-primary-900: #2A1A10;
+
+    /* Secondary - Gold #E6C279 */
+    --color-secondary-50: #FDFBF5;
+    --color-secondary-100: #FAF5E8;
+    --color-secondary-200: #F5EAD1;
+    --color-secondary-300: #EFDAB3;
+    --color-secondary-400: #E6C279;
+    --color-secondary-500: #D4A94D;
+    --color-secondary-600: #B8903A;
+    --color-secondary-700: #97752F;
+    --color-secondary-800: #7A5F27;
+    --color-secondary-900: #624C20;
+
+    /* Accent - Beige #DCC3B3 */
+    --color-accent-50: #FDFBF9;
+    --color-accent-100: #FAF6F2;
+    --color-accent-200: #F2E9E2;
+    --color-accent-300: #E9D9CD;
+    --color-accent-400: #DCC3B3;
+    --color-accent-500: #C9A894;
+    --color-accent-600: #B08B73;
+    --color-accent-700: #8F705C;
+    --color-accent-800: #745A4B;
+    --color-accent-900: #5E493E;
+
+    /* Success - Muted Forest Green */
+    --color-success-50: #F2F6F3;
+    --color-success-100: #E4ECE6;
+    --color-success-200: #C8D9CC;
+    --color-success-300: #A7C1AC;
+    --color-success-400: #7AA182;
+    --color-success-500: #5A8463;
+    --color-success-600: #4A7C59;
+    --color-success-700: #3D6549;
+    --color-success-800: #33533D;
+    --color-success-900: #2B4533;
+
+    /* Warning - Warm Amber */
+    --color-warning-50: #FEFBF3;
+    --color-warning-100: #FCF5E2;
+    --color-warning-200: #F9E9C4;
+    --color-warning-300: #F4D899;
+    --color-warning-400: #ECC46A;
+    --color-warning-500: #D4A03B;
+    --color-warning-600: #B88A2F;
+    --color-warning-700: #967128;
+    --color-warning-800: #7A5B23;
+    --color-warning-900: #644A1E;
+
+    /* Danger/Error - Terracotta Red */
+    --color-danger-50: #FCF5F4;
+    --color-danger-100: #F9EAE8;
+    --color-danger-200: #F2D4D0;
+    --color-danger-300: #E8B8B2;
+    --color-danger-400: #DA9288;
+    --color-danger-500: #C7706A;
+    --color-danger-600: #A85544;
+    --color-danger-700: #8B4639;
+    --color-danger-800: #723A30;
+    --color-danger-900: #5E312A;
+
+    /* Info - Muted Slate Blue */
+    --color-info-50: #F4F7F9;
+    --color-info-100: #E8EEF2;
+    --color-info-200: #D1DCE4;
+    --color-info-300: #B3C5D2;
+    --color-info-400: #8AA5B8;
+    --color-info-500: #6B8E9F;
+    --color-info-600: #587888;
+    --color-info-700: #486270;
+    --color-info-800: #3B505B;
+    --color-info-900: #32424B;
+}
+
+/* Global cursor-pointer for interactive elements */
+button:not(:disabled),
+a[href],
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+label[for],
+select,
+.cursor-pointer {
+    cursor: pointer;
+}
+
+button:disabled,
+a[aria-disabled="true"],
+.cursor-not-allowed {
+    cursor: not-allowed;
+}

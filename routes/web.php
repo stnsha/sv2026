@@ -1,0 +1,38 @@
+<?php
+
+use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\TableController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\PaymentController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
+Route::post('/booking/check-availability', [BookingController::class, 'checkAvailability'])->name('booking.check-availability');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
+
+Route::post('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::get('/payment/redirect', [PaymentController::class, 'redirect'])->name('payment.redirect');
+
+Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/date/{date}', [AdminBookingController::class, 'byDate'])->name('bookings.by-date');
+    Route::get('/bookings/availability', [AdminBookingController::class, 'availability'])->name('bookings.availability');
+    Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
+    Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+});
