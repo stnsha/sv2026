@@ -21,6 +21,13 @@
         </div>
     </div>
 
+    <!-- Filter Bar -->
+    <x-table-filter
+        :route="route('admin.customers.index')"
+        :filters="[]"
+        searchPlaceholder="Search name, email or phone..."
+    />
+
     <!-- Customers List -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-4 lg:px-6 py-4 border-b border-grey-200">
@@ -31,20 +38,41 @@
             <table class="min-w-full divide-y divide-grey-200">
                 <thead class="bg-grey-50">
                     <tr>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Name
+                        <th class="px-4 lg:px-6 py-3 text-left">
+                            <x-sortable-header
+                                column="name"
+                                label="Name"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden sm:table-cell">
-                            Email
+                        <th class="px-4 lg:px-6 py-3 text-left hidden sm:table-cell">
+                            <x-sortable-header
+                                column="email"
+                                label="Email"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden md:table-cell">
                             Phone
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Bookings
+                        <th class="px-4 lg:px-6 py-3 text-center">
+                            <x-sortable-header
+                                column="bookings_count"
+                                label="Bookings"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                                class="justify-center"
+                            />
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden lg:table-cell">
-                            Joined
+                        <th class="px-4 lg:px-6 py-3 text-left hidden lg:table-cell">
+                            <x-sortable-header
+                                column="created_at"
+                                label="Joined"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
                     </tr>
                 </thead>

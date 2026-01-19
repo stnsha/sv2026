@@ -17,12 +17,36 @@ class BookingController extends Controller
         private TableAssignmentService $tableAssignmentService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $bookings = Booking::query()
-            ->with(['customer', 'date', 'timeSlot'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $query = Booking::query()
+            ->with(['customer', 'date', 'timeSlot']);
+
+        // Search filter (applies to customer name/email)
+        if ($search = $request->input('search')) {
+            $query->whereHas('customer', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Sorting
+        $sortColumn = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('direction', 'desc');
+        $allowedSorts = ['created_at', 'total', 'status'];
+
+        if (in_array($sortColumn, $allowedSorts)) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $bookings = $query->paginate(10)->withQueryString();
 
         $totalBookings = Booking::count();
 
@@ -44,6 +68,8 @@ class BookingController extends Controller
             'confirmedBookings' => $confirmedBookings,
             'pendingBookings' => $pendingBookings,
             'cancelledBookings' => $cancelledBookings,
+            'currentSort' => $sortColumn,
+            'currentDirection' => $sortDirection,
         ]);
     }
 

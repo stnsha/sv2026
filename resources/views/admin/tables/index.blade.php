@@ -9,11 +9,11 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-4">
             <p class="text-sm text-grey-500">Total Tables</p>
-            <p class="text-2xl font-bold text-grey-900">{{ $tables->count() }}</p>
+            <p class="text-2xl font-bold text-grey-900">{{ $totalTables }}</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-4">
             <p class="text-sm text-grey-500">Total Capacity</p>
-            <p class="text-2xl font-bold text-grey-900">{{ $tables->sum('capacity') }}</p>
+            <p class="text-2xl font-bold text-grey-900">{{ $totalCapacity }}</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-4">
             <p class="text-sm text-grey-500">Available Today</p>
@@ -25,6 +25,27 @@
         </div>
     </div>
 
+    <!-- Filter Bar -->
+    <x-table-filter
+        :route="route('admin.tables.index')"
+        :filters="[
+            [
+                'name' => 'seat_type',
+                'placeholder' => 'All Seat Types',
+                'options' => collect($seatTypes)->mapWithKeys(fn ($type) => [$type => ucfirst($type)])->toArray(),
+            ],
+            [
+                'name' => 'today_status',
+                'placeholder' => 'All Statuses',
+                'options' => [
+                    'available' => 'Available',
+                    'booked' => 'Booked',
+                ],
+            ],
+        ]"
+        searchPlaceholder="Search table number..."
+    />
+
     <!-- Tables List -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-4 lg:px-6 py-4 border-b border-grey-200">
@@ -35,14 +56,29 @@
             <table class="min-w-full divide-y divide-grey-200">
                 <thead class="bg-grey-50">
                     <tr>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Table
+                        <th class="px-4 lg:px-6 py-3 text-left">
+                            <x-sortable-header
+                                column="table_number"
+                                label="Table"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Seat Type
+                        <th class="px-4 lg:px-6 py-3 text-left">
+                            <x-sortable-header
+                                column="seat_type"
+                                label="Seat Type"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Capacity
+                        <th class="px-4 lg:px-6 py-3 text-left">
+                            <x-sortable-header
+                                column="capacity"
+                                label="Capacity"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
                             Today's Status
@@ -85,5 +121,10 @@
                 </tbody>
             </table>
         </div>
+        @if($tables->hasPages())
+            <div class="px-4 lg:px-6 py-4 border-t border-grey-200">
+                {{ $tables->links() }}
+            </div>
+        @endif
     </div>
 @endsection
