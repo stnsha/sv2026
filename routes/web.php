@@ -11,7 +11,11 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $dates = \App\Models\Date::orderBy('date_value')->get();
+    $timeSlots = \App\Models\TimeSlot::all();
+    $prices = \App\Models\Price::all();
+
+    return view('welcome', compact('dates', 'timeSlots', 'prices'));
 });
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
