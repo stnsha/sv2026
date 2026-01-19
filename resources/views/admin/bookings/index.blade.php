@@ -25,6 +25,25 @@
         </div>
     </div>
 
+    <!-- Filter Bar -->
+    <x-table-filter
+        :route="route('admin.bookings.index')"
+        :filters="[
+            [
+                'name' => 'status',
+                'placeholder' => 'All Statuses',
+                'options' => [
+                    \App\Models\Booking::STATUS_INITIATED => 'Initiated',
+                    \App\Models\Booking::STATUS_PENDING_PAYMENT => 'Pending Payment',
+                    \App\Models\Booking::STATUS_CONFIRMED => 'Confirmed',
+                    \App\Models\Booking::STATUS_CANCELLED => 'Cancelled',
+                    \App\Models\Booking::STATUS_PAYMENT_FAILED => 'Payment Failed',
+                ],
+            ],
+        ]"
+        searchPlaceholder="Search customer name or email..."
+    />
+
     <!-- Bookings List -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-4 lg:px-6 py-4 border-b border-grey-200">
@@ -38,17 +57,33 @@
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
                             Customer
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Date
+                        <th class="px-4 lg:px-6 py-3 text-left">
+                            <x-sortable-header
+                                column="created_at"
+                                label="Date"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden md:table-cell">
                             Time
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
-                            Status
+                        <th class="px-4 lg:px-6 py-3 text-left">
+                            <x-sortable-header
+                                column="status"
+                                label="Status"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                            />
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-500 uppercase tracking-wider hidden sm:table-cell">
-                            Total
+                        <th class="px-4 lg:px-6 py-3 text-right hidden sm:table-cell">
+                            <x-sortable-header
+                                column="total"
+                                label="Total"
+                                :currentSort="$currentSort"
+                                :currentDirection="$currentDirection"
+                                class="justify-end"
+                            />
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-500 uppercase tracking-wider">
                             <span class="sr-only">Actions</span>
