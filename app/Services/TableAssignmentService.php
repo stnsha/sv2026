@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\BlockedTable;
+use App\Models\Booking;
 use App\Models\Table;
 use App\Models\TableBooking;
 use Illuminate\Support\Collection;
@@ -77,15 +79,20 @@ class TableAssignmentService
             ->where('time_slot_id', $timeSlotId)
             ->whereHas('booking', function ($query) {
                 $query->whereIn('status', [
-                    \App\Models\Booking::STATUS_INITIATED,
-                    \App\Models\Booking::STATUS_PENDING_PAYMENT,
-                    \App\Models\Booking::STATUS_CONFIRMED,
+                    Booking::STATUS_INITIATED,
+                    Booking::STATUS_PENDING_PAYMENT,
+                    Booking::STATUS_CONFIRMED,
                 ]);
             })
             ->pluck('table_id');
 
+        $blockedTableIds = BlockedTable::query()
+            ->where('date_id', $dateId)
+            ->pluck('table_id');
+
         return Table::query()
             ->whereNotIn('id', $bookedTableIds)
+            ->whereNotIn('id', $blockedTableIds)
             ->orderBy('capacity', 'desc')
             ->get();
     }
