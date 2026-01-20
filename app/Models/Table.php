@@ -21,4 +21,9 @@ class Table extends Model
     {
         return $this->hasMany(TableBooking::class);
     }
+
+    public function blockedDates(): HasMany
+    {
+        return $this->hasMany(BlockedTable::class);
+    }
 }

@@ -1,19 +1,22 @@
 <?php
 
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Admin\CapacityController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\TableController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
+use App\Models\Date;
+use App\Models\Price;
+use App\Models\TimeSlot;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $dates = \App\Models\Date::orderBy('date_value')->get();
-    $timeSlots = \App\Models\TimeSlot::all();
-    $prices = \App\Models\Price::all();
+    $dates = Date::orderBy('date_value')->get();
+    $timeSlots = TimeSlot::all();
+    $prices = Price::all();
 
     return view('welcome', compact('dates', 'timeSlots', 'prices'));
 });
@@ -36,7 +39,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/bookings/date/{date}', [AdminBookingController::class, 'byDate'])->name('bookings.by-date');
     Route::get('/bookings/availability', [AdminBookingController::class, 'availability'])->name('bookings.availability');
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
-    Route::get('/tables', [TableController::class, 'index'])->name('tables.index');
+    Route::get('/capacity', [CapacityController::class, 'index'])->name('capacity.index');
+    Route::get('/capacity/{date}/edit', [CapacityController::class, 'edit'])->name('capacity.edit');
+    Route::put('/capacity/{date}', [CapacityController::class, 'update'])->name('capacity.update');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 });

@@ -29,4 +29,9 @@ class Date extends Model
     {
         return $this->date_value->format('d M Y');
     }
+
+    public function blockedTables(): HasMany
+    {
+        return $this->hasMany(BlockedTable::class);
+    }
 }
