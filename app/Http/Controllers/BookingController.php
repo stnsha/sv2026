@@ -9,16 +9,15 @@ use App\Models\Date;
 use App\Models\Price;
 use App\Models\TimeSlot;
 use App\Services\BookingService;
-use App\Services\ToyyibPayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use RuntimeException;
 
 class BookingController extends Controller
 {
     public function __construct(
-        private BookingService $bookingService,
-        private ToyyibPayService $toyyibPayService
+        private BookingService $bookingService
     ) {}
 
     public function index(): View
@@ -51,22 +50,27 @@ class BookingController extends Controller
                 $request->input('pax_details')
             );
 
-            $billResult = $this->toyyibPayService->createBill($booking);
+            // TODO: Re-enable payment gateway when ready
+            // $billResult = $this->toyyibPayService->createBill($booking);
+            // if (!$billResult['success']) {
+            //     $this->bookingService->handlePaymentFailure($booking, $billResult['error']);
+            //     return redirect()->back()
+            //         ->withInput()
+            //         ->with('error', 'Unable to initiate payment. Please try again.');
+            // }
+            // $this->bookingService->initiatePayment($booking, $billResult['bill_code']);
+            // $paymentUrl = $this->toyyibPayService->getPaymentUrl($billResult['bill_code']);
+            // return redirect()->away($paymentUrl);
 
-            if (!$billResult['success']) {
-                $this->bookingService->handlePaymentFailure($booking, $billResult['error']);
+            // For testing: directly confirm booking without payment
+            $booking->update([
+                'status' => Booking::STATUS_CONFIRMED,
+                'status_message' => 'Test booking - payment bypassed',
+            ]);
 
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'Unable to initiate payment. Please try again.');
-            }
-
-            $this->bookingService->initiatePayment($booking, $billResult['bill_code']);
-
-            $paymentUrl = $this->toyyibPayService->getPaymentUrl($billResult['bill_code']);
-
-            return redirect()->away($paymentUrl);
-        } catch (\RuntimeException $e) {
+            return redirect()->route('booking.show', $booking)
+                ->with('success', 'Tempahan berjaya!');
+        } catch (RuntimeException $e) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', $e->getMessage());

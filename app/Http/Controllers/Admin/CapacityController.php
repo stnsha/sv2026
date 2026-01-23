@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Date;
 use App\Models\Table;
+use App\Models\TimeSlot;
 use App\Services\CapacityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,17 +27,19 @@ class CapacityController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $timeSlots = TimeSlot::all();
         $allTables = Table::all();
         $totalTables = $allTables->count();
         $totalCapacity = $allTables->sum('capacity');
 
         $dateSummaries = [];
         foreach ($dates as $date) {
-            $dateSummaries[$date->id] = $this->capacityService->getDateCapacitySummary($date);
+            $dateSummaries[$date->id] = $this->capacityService->getDateCapacitySummaryBySlot($date);
         }
 
         return view('admin.capacity.index', [
             'dates' => $dates,
+            'timeSlots' => $timeSlots,
             'dateSummaries' => $dateSummaries,
             'totalTables' => $totalTables,
             'totalCapacity' => $totalCapacity,
@@ -44,19 +47,22 @@ class CapacityController extends Controller
         ]);
     }
 
-    public function edit(Date $date): View
+    public function edit(Date $date, TimeSlot $timeSlot): View
     {
         $tables = Table::query()->orderBy('table_number')->get();
-        $blockedTableIds = $date->blockedTables()->pluck('table_id')->toArray();
+        $blockedTableIds = $this->capacityService->getBlockedTableIds($date->id, $timeSlot->id);
+        $bookedTableIds = $this->capacityService->getBookedTableIds($date->id, $timeSlot->id);
 
         return view('admin.capacity.edit', [
             'date' => $date,
+            'timeSlot' => $timeSlot,
             'tables' => $tables,
             'blockedTableIds' => $blockedTableIds,
+            'bookedTableIds' => $bookedTableIds,
         ]);
     }
 
-    public function update(Request $request, Date $date): RedirectResponse
+    public function update(Request $request, Date $date, TimeSlot $timeSlot): RedirectResponse
     {
         $validated = $request->validate([
             'blocked_tables' => 'nullable|array',
@@ -64,11 +70,10 @@ class CapacityController extends Controller
         ]);
 
         $blockedTableIds = $validated['blocked_tables'] ?? [];
-
-        $this->capacityService->syncBlockedTables($date->id, $blockedTableIds);
+        $this->capacityService->syncBlockedTablesForSlot($date->id, $timeSlot->id, $blockedTableIds);
 
         return redirect()
             ->route('admin.capacity.index')
-            ->with('success', 'Blocked tables updated successfully for ' . $date->formatted_date);
+            ->with('success', 'Blocked tables updated for ' . $date->formatted_date . ' - ' . $timeSlot->formatted_time);
     }
 }

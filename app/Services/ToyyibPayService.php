@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Booking;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -74,7 +75,7 @@ class ToyyibPayService
                 'success' => false,
                 'error' => 'Payment gateway request failed',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('ToyyibPay createBill exception', ['message' => $e->getMessage()]);
 
             return [

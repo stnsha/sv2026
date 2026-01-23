@@ -1,148 +1,171 @@
-@extends('layouts.admin')
+@extends('layouts.dashboard')
 
 @section('title', 'Booking #' . $booking->id)
+@section('page-title', 'Booking #' . $booking->id)
+@section('page-description', 'View booking details for ' . $booking->customer->name)
 
 @section('content')
-<div class="mb-4">
-    <a href="{{ route('admin.bookings.by-date', $booking->date) }}" class="text-blue-600 hover:text-blue-800">
-        Back to {{ $booking->date->formatted_date }}
-    </a>
-</div>
-
-<div class="bg-white shadow rounded-lg p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Booking #{{ $booking->id }}</h1>
-        <span class="px-3 py-1 rounded-full text-sm font-medium
-            @if($booking->status === \App\Models\Booking::STATUS_CONFIRMED) bg-green-100 text-green-800
-            @elseif($booking->status === \App\Models\Booking::STATUS_PENDING_PAYMENT) bg-yellow-100 text-yellow-800
-            @elseif($booking->status === \App\Models\Booking::STATUS_PAYMENT_FAILED) bg-red-100 text-red-800
-            @elseif($booking->status === \App\Models\Booking::STATUS_CANCELLED) bg-gray-100 text-gray-800
-            @else bg-blue-100 text-blue-800
-            @endif">
-            {{ $booking->status_label }}
-        </span>
+    <div class="mb-4">
+        @if(request()->query('from') === 'capacity')
+            <a href="{{ route('admin.bookings.by-date', ['date' => $booking->date, 'timeSlot' => $booking->timeSlot, 'from' => 'capacity']) }}" class="text-primary-600 hover:text-primary-700 text-sm">
+                Back to {{ $booking->date->formatted_date }} - {{ $booking->timeSlot->formatted_time }}
+            </a>
+        @else
+            <a href="{{ route('admin.bookings.index') }}" class="text-primary-600 hover:text-primary-700 text-sm">
+                Back to Bookings
+            </a>
+        @endif
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Booking Details</h2>
-            <dl class="space-y-2">
-                <div>
-                    <dt class="text-sm text-gray-600">Date</dt>
-                    <dd class="font-medium">{{ $booking->date->formatted_date }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-gray-600">Time</dt>
-                    <dd class="font-medium">{{ $booking->timeSlot->formatted_time }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-gray-600">Assigned Tables</dt>
-                    <dd>
-                        @foreach($booking->tableBookings as $tb)
-                            <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-1">
-                                {{ $tb->table->table_number }} ({{ $tb->table->capacity }}-seater)
-                            </span>
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-grey-900">Booking Details</h2>
+            @switch($booking->status)
+                @case(\App\Models\Booking::STATUS_CONFIRMED)
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-success-100 text-success-700">
+                        {{ $booking->status_label }}
+                    </span>
+                    @break
+                @case(\App\Models\Booking::STATUS_PENDING_PAYMENT)
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-warning-100 text-warning-700">
+                        {{ $booking->status_label }}
+                    </span>
+                    @break
+                @case(\App\Models\Booking::STATUS_PAYMENT_FAILED)
+                @case(\App\Models\Booking::STATUS_CANCELLED)
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-danger-100 text-danger-700">
+                        {{ $booking->status_label }}
+                    </span>
+                    @break
+                @default
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-grey-100 text-grey-700">
+                        {{ $booking->status_label }}
+                    </span>
+            @endswitch
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold text-grey-800 mb-4">Reservation Info</h3>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm text-grey-500">Date</dt>
+                        <dd class="font-medium text-grey-900">{{ $booking->date->formatted_date }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-grey-500">Time</dt>
+                        <dd class="font-medium text-grey-900">{{ $booking->timeSlot->formatted_time }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-grey-500">Assigned Tables</dt>
+                        <dd>
+                            @foreach($booking->tableBookings as $tb)
+                                <span class="inline-block bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm mr-1 mb-1">
+                                    {{ $tb->table->table_number }} ({{ $tb->table->capacity }}-seater)
+                                </span>
+                            @endforeach
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-grey-500">Created At</dt>
+                        <dd class="font-medium text-grey-900">{{ $booking->created_at->format('d M Y, g:i A') }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-grey-800 mb-4">Customer Information</h3>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm text-grey-500">Name</dt>
+                        <dd class="font-medium text-grey-900">{{ $booking->customer->name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-grey-500">Email</dt>
+                        <dd class="font-medium text-grey-900">{{ $booking->customer->email }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm text-grey-500">Phone</dt>
+                        <dd class="font-medium text-grey-900">{{ $booking->customer->phone_number }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-grey-800 mb-4">Payment Information</h3>
+                <dl class="space-y-3">
+                    @if($booking->bill_code)
+                        <div>
+                            <dt class="text-sm text-grey-500">Bill Code</dt>
+                            <dd class="font-medium text-grey-900">{{ $booking->bill_code }}</dd>
+                        </div>
+                    @endif
+                    @if($booking->transaction_reference_no)
+                        <div>
+                            <dt class="text-sm text-grey-500">Transaction Reference</dt>
+                            <dd class="font-medium text-grey-900">{{ $booking->transaction_reference_no }}</dd>
+                        </div>
+                    @endif
+                    @if($booking->transaction_time)
+                        <div>
+                            <dt class="text-sm text-grey-500">Transaction Time</dt>
+                            <dd class="font-medium text-grey-900">{{ $booking->transaction_time->format('d M Y, g:i A') }}</dd>
+                        </div>
+                    @endif
+                    @if($booking->status_message)
+                        <div>
+                            <dt class="text-sm text-grey-500">Status Message</dt>
+                            <dd class="font-medium text-grey-900">{{ $booking->status_message }}</dd>
+                        </div>
+                    @endif
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t border-grey-200 pt-6">
+            <h3 class="text-lg font-semibold text-grey-800 mb-4">Guest Breakdown</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-grey-200">
+                    <thead class="bg-grey-50">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-xs font-medium text-grey-500 uppercase tracking-wider">Category</th>
+                            <th class="text-center py-3 px-4 text-xs font-medium text-grey-500 uppercase tracking-wider">Quantity</th>
+                            <th class="text-right py-3 px-4 text-xs font-medium text-grey-500 uppercase tracking-wider">Unit Price</th>
+                            <th class="text-right py-3 px-4 text-xs font-medium text-grey-500 uppercase tracking-wider">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-grey-200">
+                        @foreach($booking->details as $detail)
+                            <tr>
+                                <td class="py-3 px-4 text-sm text-grey-900">{{ $detail->price->category }}</td>
+                                <td class="text-center py-3 px-4 text-sm text-grey-600">{{ $detail->quantity }}</td>
+                                <td class="text-right py-3 px-4 text-sm text-grey-600">RM {{ number_format($detail->price->amount, 2) }}</td>
+                                <td class="text-right py-3 px-4 text-sm text-grey-900">RM {{ number_format($detail->total, 2) }}</td>
+                            </tr>
                         @endforeach
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-gray-600">Created At</dt>
-                    <dd class="font-medium">{{ $booking->created_at->format('d M Y, g:i A') }}</dd>
-                </div>
-            </dl>
-        </div>
-
-        <div>
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Customer Information</h2>
-            <dl class="space-y-2">
-                <div>
-                    <dt class="text-sm text-gray-600">Name</dt>
-                    <dd class="font-medium">{{ $booking->customer->name }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-gray-600">Email</dt>
-                    <dd class="font-medium">{{ $booking->customer->email }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-gray-600">Phone</dt>
-                    <dd class="font-medium">{{ $booking->customer->phone_number }}</dd>
-                </div>
-            </dl>
-        </div>
-
-        <div>
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Payment Information</h2>
-            <dl class="space-y-2">
-                @if($booking->bill_code)
-                    <div>
-                        <dt class="text-sm text-gray-600">Bill Code</dt>
-                        <dd class="font-medium">{{ $booking->bill_code }}</dd>
-                    </div>
-                @endif
-                @if($booking->transaction_reference_no)
-                    <div>
-                        <dt class="text-sm text-gray-600">Transaction Reference</dt>
-                        <dd class="font-medium">{{ $booking->transaction_reference_no }}</dd>
-                    </div>
-                @endif
-                @if($booking->transaction_time)
-                    <div>
-                        <dt class="text-sm text-gray-600">Transaction Time</dt>
-                        <dd class="font-medium">{{ $booking->transaction_time->format('d M Y, g:i A') }}</dd>
-                    </div>
-                @endif
-                @if($booking->status_message)
-                    <div>
-                        <dt class="text-sm text-gray-600">Status Message</dt>
-                        <dd class="font-medium">{{ $booking->status_message }}</dd>
-                    </div>
-                @endif
-            </dl>
+                    </tbody>
+                    <tfoot class="bg-grey-50">
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-right text-sm text-grey-500">Subtotal:</td>
+                            <td class="py-3 px-4 text-right text-sm text-grey-900">RM {{ number_format($booking->subtotal, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-right text-sm text-grey-500">Service Charge:</td>
+                            <td class="py-3 px-4 text-right text-sm text-grey-900">RM {{ number_format($booking->service_charge, 2) }}</td>
+                        </tr>
+                        @if($booking->discount > 0)
+                            <tr>
+                                <td colspan="3" class="py-3 px-4 text-right text-sm text-grey-500">Discount:</td>
+                                <td class="py-3 px-4 text-right text-sm text-danger-600">-RM {{ number_format($booking->discount, 2) }}</td>
+                            </tr>
+                        @endif
+                        <tr class="border-t-2 border-grey-300">
+                            <td colspan="3" class="py-3 px-4 text-right font-semibold text-grey-900">Total:</td>
+                            <td class="py-3 px-4 text-right font-bold text-lg text-grey-900">RM {{ number_format($booking->total, 2) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
-
-    <div class="mt-6 border-t pt-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Guest Breakdown</h2>
-        <table class="w-full">
-            <thead>
-                <tr class="border-b bg-gray-50">
-                    <th class="text-left py-2 px-2 text-sm font-medium text-gray-600">Category</th>
-                    <th class="text-center py-2 px-2 text-sm font-medium text-gray-600">Quantity</th>
-                    <th class="text-right py-2 px-2 text-sm font-medium text-gray-600">Unit Price</th>
-                    <th class="text-right py-2 px-2 text-sm font-medium text-gray-600">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($booking->details as $detail)
-                    <tr class="border-b">
-                        <td class="py-2 px-2">{{ $detail->price->category }}</td>
-                        <td class="text-center py-2 px-2">{{ $detail->quantity }}</td>
-                        <td class="text-right py-2 px-2">RM {{ number_format($detail->price->amount, 2) }}</td>
-                        <td class="text-right py-2 px-2">RM {{ number_format($detail->total, 2) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr class="border-b">
-                    <td colspan="3" class="py-2 px-2 text-right text-gray-600">Subtotal:</td>
-                    <td class="py-2 px-2 text-right">RM {{ number_format($booking->subtotal, 2) }}</td>
-                </tr>
-                <tr class="border-b">
-                    <td colspan="3" class="py-2 px-2 text-right text-gray-600">Service Charge:</td>
-                    <td class="py-2 px-2 text-right">RM {{ number_format($booking->service_charge, 2) }}</td>
-                </tr>
-                @if($booking->discount > 0)
-                    <tr class="border-b">
-                        <td colspan="3" class="py-2 px-2 text-right text-gray-600">Discount:</td>
-                        <td class="py-2 px-2 text-right text-red-600">-RM {{ number_format($booking->discount, 2) }}</td>
-                    </tr>
-                @endif
-                <tr>
-                    <td colspan="3" class="py-2 px-2 text-right font-bold">Total:</td>
-                    <td class="py-2 px-2 text-right font-bold text-lg">RM {{ number_format($booking->total, 2) }}</td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-</div>
 @endsection
