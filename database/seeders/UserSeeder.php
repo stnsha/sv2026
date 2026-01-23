@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
         User::query()->updateOrCreate(
             ['email' => 'anasuharosli@gmail.com'],
             [
-                'name' => 'Ana Suha',
+                'name' => 'Anasuha',
                 'password' => Hash::make(config('seeding.user.password')),
             ]
         );
