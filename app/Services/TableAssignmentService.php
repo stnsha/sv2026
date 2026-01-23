@@ -88,6 +88,7 @@ class TableAssignmentService
 
         $blockedTableIds = BlockedTable::query()
             ->where('date_id', $dateId)
+            ->where('time_slot_id', $timeSlotId)
             ->pluck('table_id');
 
         return Table::query()

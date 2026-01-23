@@ -16,7 +16,7 @@
                 </button>
 
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center">
-                    <span class="text-xl font-bold text-grey-900">SV</span>
+                    <span class="text-xl font-bold text-grey-900">Sand Village</span>
                     <span class="ml-2 text-xs font-semibold text-primary-600 bg-primary-100 px-2 py-1 rounded-xl">Admin</span>
                 </a>
             </div>

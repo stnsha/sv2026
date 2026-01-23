@@ -10,6 +10,7 @@ class BlockedTable extends Model
     protected $fillable = [
         'table_id',
         'date_id',
+        'time_slot_id',
         'reason',
     ];
 
@@ -21,5 +22,10 @@ class BlockedTable extends Model
     public function date(): BelongsTo
     {
         return $this->belongsTo(Date::class);
+    }
+
+    public function timeSlot(): BelongsTo
+    {
+        return $this->belongsTo(TimeSlot::class);
     }
 }

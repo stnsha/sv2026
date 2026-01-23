@@ -11,14 +11,33 @@ use App\Http\Controllers\PaymentController;
 use App\Models\Date;
 use App\Models\Price;
 use App\Models\TimeSlot;
+use App\Services\TableAssignmentService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/', function (TableAssignmentService $tableAssignmentService) {
     $dates = Date::orderBy('date_value')->get();
     $timeSlots = TimeSlot::all();
     $prices = Price::all();
 
-    return view('welcome', compact('dates', 'timeSlots', 'prices'));
+    $slotAvailability = [];
+    $soldOutDates = [];
+
+    foreach ($dates as $date) {
+        $allSlotsSoldOut = true;
+        foreach ($timeSlots as $timeSlot) {
+            $availableTables = $tableAssignmentService->getAvailableTables($date->id, $timeSlot->id);
+            $availablePax = $availableTables->sum('capacity');
+            $slotAvailability[$date->id][$timeSlot->id] = $availablePax;
+            if ($availablePax > 0) {
+                $allSlotsSoldOut = false;
+            }
+        }
+        if ($allSlotsSoldOut) {
+            $soldOutDates[] = $date->id;
+        }
+    }
+
+    return view('welcome', compact('dates', 'timeSlots', 'prices', 'slotAvailability', 'soldOutDates'));
 });
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
@@ -36,12 +55,12 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/date/{date}', [AdminBookingController::class, 'byDate'])->name('bookings.by-date');
+    Route::get('/bookings/date/{date}/{timeSlot}', [AdminBookingController::class, 'byDate'])->name('bookings.by-date');
     Route::get('/bookings/availability', [AdminBookingController::class, 'availability'])->name('bookings.availability');
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
     Route::get('/capacity', [CapacityController::class, 'index'])->name('capacity.index');
-    Route::get('/capacity/{date}/edit', [CapacityController::class, 'edit'])->name('capacity.edit');
-    Route::put('/capacity/{date}', [CapacityController::class, 'update'])->name('capacity.update');
+    Route::get('/capacity/{date}/{timeSlot}/edit', [CapacityController::class, 'edit'])->name('capacity.edit');
+    Route::put('/capacity/{date}/{timeSlot}', [CapacityController::class, 'update'])->name('capacity.update');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 });

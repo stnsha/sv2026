@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
 
 @section('title', 'Edit Capacity - ' . $date->formatted_date)
-@section('page-title', $date->formatted_date)
-@section('page-description', 'Manage blocked tables for this date')
+@section('page-title', $date->formatted_date . ' - ' . $timeSlot->formatted_time)
+@section('page-description', 'Manage blocked tables for this time slot')
 
 @section('content')
     <div class="mb-4">
@@ -11,7 +11,7 @@
         </a>
     </div>
 
-    <form action="{{ route('admin.capacity.update', $date) }}" method="POST">
+    <form action="{{ route('admin.capacity.update', ['date' => $date, 'timeSlot' => $timeSlot]) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -20,8 +20,7 @@
                 <div>
                     <h2 class="text-xl font-semibold text-grey-900">Blocked Tables</h2>
                     <p class="text-sm text-grey-500 mt-1">
-                        Select tables to block for {{ $date->date_value->format('l, d M Y') }}.
-                        Blocked tables will not be available for booking.
+                        Select tables to block. Blocked tables will not be available for booking.
                     </p>
                 </div>
                 <div class="flex gap-2">
@@ -36,24 +35,43 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 @foreach($tables as $table)
-                    <label class="relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all
-                        {{ in_array($table->id, $blockedTableIds) ? 'border-danger-500 bg-danger-50' : 'border-grey-200 hover:border-grey-300' }}">
-                        <input
-                            type="checkbox"
-                            name="blocked_tables[]"
-                            value="{{ $table->id }}"
-                            class="table-checkbox sr-only"
-                            {{ in_array($table->id, $blockedTableIds) ? 'checked' : '' }}
-                        >
-                        <div class="text-lg font-bold text-grey-900">{{ $table->table_number }}</div>
-                        <div class="text-sm text-grey-500">{{ $table->capacity }}-seater</div>
-                        <div class="mt-2">
-                            <span class="status-badge px-2 py-1 text-xs rounded-full
-                                {{ in_array($table->id, $blockedTableIds) ? 'bg-danger-100 text-danger-700' : 'bg-success-100 text-success-700' }}">
-                                {{ in_array($table->id, $blockedTableIds) ? 'Blocked' : 'Available' }}
-                            </span>
+                    @php
+                        $isBooked = in_array($table->id, $bookedTableIds);
+                        $isBlocked = in_array($table->id, $blockedTableIds);
+                    @endphp
+
+                    @if($isBooked)
+                        {{-- Booked tables - disabled, cannot be blocked --}}
+                        <div class="relative flex flex-col items-center p-4 border-2 rounded-lg border-primary-500 bg-primary-50 opacity-75 cursor-not-allowed">
+                            <div class="text-lg font-bold text-grey-900">{{ $table->table_number }}</div>
+                            <div class="text-sm text-grey-500">{{ $table->capacity }}-seater</div>
+                            <div class="mt-2">
+                                <span class="px-2 py-1 text-xs rounded-full bg-primary-100 text-primary-700">
+                                    Booked
+                                </span>
+                            </div>
                         </div>
-                    </label>
+                    @else
+                        {{-- Available or Blocked tables - can be toggled --}}
+                        <label class="table-label relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all
+                            {{ $isBlocked ? 'border-danger-500 bg-danger-50' : 'border-grey-200 hover:border-grey-300' }}">
+                            <input
+                                type="checkbox"
+                                name="blocked_tables[]"
+                                value="{{ $table->id }}"
+                                class="table-checkbox sr-only"
+                                {{ $isBlocked ? 'checked' : '' }}
+                            >
+                            <div class="text-lg font-bold text-grey-900">{{ $table->table_number }}</div>
+                            <div class="text-sm text-grey-500">{{ $table->capacity }}-seater</div>
+                            <div class="mt-2">
+                                <span class="status-badge px-2 py-1 text-xs rounded-full
+                                    {{ $isBlocked ? 'bg-danger-100 text-danger-700' : 'bg-success-100 text-success-700' }}">
+                                    {{ $isBlocked ? 'Blocked' : 'Available' }}
+                                </span>
+                            </div>
+                        </label>
+                    @endif
                 @endforeach
             </div>
         </div>

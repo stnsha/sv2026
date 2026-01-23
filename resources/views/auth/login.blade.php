@@ -60,6 +60,20 @@
                     >
                 </div>
 
+                <!-- Remember Me -->
+                <div class="mb-6 flex items-center">
+                    <input
+                        type="checkbox"
+                        id="remember"
+                        name="remember"
+                        class="h-4 w-4 text-primary-600 border-grey-300 rounded focus:ring-primary-600"
+                        {{ old('remember') ? 'checked' : '' }}
+                    >
+                    <label for="remember" class="ml-2 text-sm text-grey-700">
+                        Remember me
+                    </label>
+                </div>
+
                 <!-- Submit Button -->
                 <button
                     type="submit"
@@ -70,10 +84,6 @@
             </form>
         </div>
 
-        <!-- Footer -->
-        <p class="text-center text-grey-500 text-sm mt-6">
-            Admin Dashboard
-        </p>
     </div>
 </body>
 </html>

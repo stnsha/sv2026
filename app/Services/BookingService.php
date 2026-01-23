@@ -9,6 +9,7 @@ use App\Models\Price;
 use App\Models\TableBooking;
 use DateTime;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class BookingService
 {
@@ -24,7 +25,7 @@ class BookingService
             $tableResult = $this->tableAssignmentService->findOptimalTables($totalPax, $dateId, $timeSlotId);
 
             if ($tableResult === null) {
-                throw new \RuntimeException('Not enough tables available for the requested party size.');
+                throw new RuntimeException('Not enough tables available for the requested party size.');
             }
 
             $customer = Customer::firstOrCreate(

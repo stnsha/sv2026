@@ -73,29 +73,24 @@ class BookingController extends Controller
         ]);
     }
 
-    public function byDate(Date $date): View
+    public function byDate(Date $date, TimeSlot $timeSlot): View
     {
-        $timeSlots = TimeSlot::all();
-
         $bookings = Booking::with(['customer', 'timeSlot', 'details.price', 'tableBookings.table'])
             ->where('date_id', $date->id)
+            ->where('time_slot_id', $timeSlot->id)
             ->where('status', Booking::STATUS_CONFIRMED)
-            ->orderBy('time_slot_id')
             ->get();
 
-        $availabilitySummary = [];
-        foreach ($timeSlots as $timeSlot) {
-            $availabilitySummary[$timeSlot->id] = $this->tableAssignmentService->getAvailabilitySummary(
-                $date->id,
-                $timeSlot->id
-            );
-        }
+        $availabilitySummary = $this->tableAssignmentService->getAvailabilitySummary(
+            $date->id,
+            $timeSlot->id
+        );
 
         $totalRevenue = $bookings->sum('total');
 
         return view('admin.bookings.by-date', compact(
             'date',
-            'timeSlots',
+            'timeSlot',
             'bookings',
             'availabilitySummary',
             'totalRevenue'
