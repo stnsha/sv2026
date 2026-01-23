@@ -41,14 +41,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('blocked_tables', function (Blueprint $table) {
-            // Drop new unique constraint
+            // Drop foreign keys first (MySQL requires this before dropping unique index)
+            $table->dropForeign(['table_id']);
+            $table->dropForeign(['time_slot_id']);
+
+            // Drop unique constraint
             $table->dropUnique(['table_id', 'date_id', 'time_slot_id']);
 
-            // Drop foreign key on table_id
-            $table->dropForeign(['table_id']);
-
-            // Drop foreign key and column for time_slot_id
-            $table->dropForeign(['time_slot_id']);
+            // Drop time_slot_id column
             $table->dropColumn('time_slot_id');
         });
 
