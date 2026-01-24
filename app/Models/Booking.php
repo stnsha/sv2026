@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasReferenceId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,15 +10,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Booking extends Model
 {
+    use HasReferenceId;
     use SoftDeletes;
 
     public const STATUS_INITIATED = 0;
+
     public const STATUS_PENDING_PAYMENT = 1;
+
     public const STATUS_CONFIRMED = 2;
+
     public const STATUS_CANCELLED = 3;
+
     public const STATUS_PAYMENT_FAILED = 4;
 
     protected $fillable = [
+        'reference_id',
         'customer_id',
         'date_id',
         'time_slot_id',
@@ -76,5 +83,10 @@ class Booking extends Model
             self::STATUS_PAYMENT_FAILED => 'Payment Failed',
             default => 'Unknown',
         };
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'reference_id';
     }
 }

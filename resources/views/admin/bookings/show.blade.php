@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Booking #' . $booking->id)
-@section('page-title', 'Booking #' . $booking->id)
+@section('title', 'Booking #' . $booking->reference_id)
+@section('page-title', 'Booking #' . $booking->reference_id)
 @section('page-description', 'View booking details for ' . $booking->customer->name)
 
 @section('content')

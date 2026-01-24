@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Amend Booking #' . $booking->id)
-@section('page-title', 'Amend Booking #' . $booking->id)
+@section('title', 'Amend Booking #' . $booking->reference_id)
+@section('page-title', 'Amend Booking #' . $booking->reference_id)
 @section('page-description', 'Change date and time for ' . $booking->customer->name)
 
 @section('content')

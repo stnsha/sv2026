@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->string('reference_id', 5)->unique();
             $table->unsignedBigInteger('customer_id');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('discount', 10, 2);

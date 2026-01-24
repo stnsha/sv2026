@@ -52,7 +52,7 @@
                     <tbody class="bg-white divide-y divide-grey-200">
                         @foreach($bookings as $booking)
                             <tr class="hover:bg-grey-50">
-                                <td class="py-3 px-4 text-sm text-grey-900">#{{ $booking->id }}</td>
+                                <td class="py-3 px-4 text-sm text-grey-900">#{{ $booking->reference_id }}</td>
                                 <td class="py-3 px-4 text-sm font-medium text-grey-900">{{ $booking->customer->name }}</td>
                                 <td class="py-3 px-4">
                                     <div class="text-sm text-grey-900">{{ $booking->customer->email }}</div>

@@ -69,6 +69,7 @@ class BookingService
             $total = $subtotal + $serviceCharge - $discount;
 
             $booking = Booking::create([
+                'reference_id' => Booking::generateUniqueReferenceId(),
                 'customer_id' => $customer->id,
                 'date_id' => $dateId,
                 'time_slot_id' => $timeSlotId,

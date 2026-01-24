@@ -5,7 +5,7 @@
 @section('content')
 <div class="bg-white shadow rounded-lg p-6">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Booking #{{ $booking->id }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Booking #{{ $booking->reference_id }}</h1>
         <span class="px-3 py-1 rounded-full text-sm font-medium
             @if($booking->status === \App\Models\Booking::STATUS_CONFIRMED) bg-green-100 text-green-800
             @elseif($booking->status === \App\Models\Booking::STATUS_PENDING_PAYMENT) bg-yellow-100 text-yellow-800
