@@ -58,6 +58,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/bookings/date/{date}/{timeSlot}', [AdminBookingController::class, 'byDate'])->name('bookings.by-date');
     Route::get('/bookings/availability', [AdminBookingController::class, 'availability'])->name('bookings.availability');
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/edit', [AdminBookingController::class, 'edit'])->name('bookings.edit');
+    Route::put('/bookings/{booking}', [AdminBookingController::class, 'update'])->name('bookings.update');
+    Route::post('/bookings/{booking}/check-amendment-availability', [AdminBookingController::class, 'checkAmendmentAvailability'])->name('bookings.check-amendment-availability');
     Route::get('/capacity', [CapacityController::class, 'index'])->name('capacity.index');
     Route::get('/capacity/{date}/{timeSlot}/edit', [CapacityController::class, 'edit'])->name('capacity.edit');
     Route::put('/capacity/{date}/{timeSlot}', [CapacityController::class, 'update'])->name('capacity.update');

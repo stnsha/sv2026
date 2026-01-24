@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AmendBookingRequest;
 use App\Models\Booking;
 use App\Models\Date;
 use App\Models\TimeSlot;
+use App\Services\BookingAmendmentService;
 use App\Services\TableAssignmentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BookingController extends Controller
 {
     public function __construct(
-        private TableAssignmentService $tableAssignmentService
+        private TableAssignmentService $tableAssignmentService,
+        private BookingAmendmentService $bookingAmendmentService
     ) {}
 
     public function index(Request $request): View
@@ -116,5 +120,79 @@ class BookingController extends Controller
         $summary = $this->tableAssignmentService->getAvailabilitySummary($dateId, $timeSlotId);
 
         return response()->json($summary);
+    }
+
+    public function edit(Booking $booking): View|RedirectResponse
+    {
+        if ($booking->status !== Booking::STATUS_CONFIRMED) {
+            return redirect()
+                ->route('admin.bookings.show', $booking)
+                ->with('error', 'Only confirmed bookings can be amended.');
+        }
+
+        $booking->load(['customer', 'date', 'timeSlot', 'details.price', 'tableBookings.table']);
+
+        $dates = Date::orderBy('date_value')->get();
+        $timeSlots = TimeSlot::all();
+
+        return view('admin.bookings.edit', compact('booking', 'dates', 'timeSlots'));
+    }
+
+    public function update(AmendBookingRequest $request, Booking $booking): RedirectResponse
+    {
+        if ($booking->status !== Booking::STATUS_CONFIRMED) {
+            return redirect()
+                ->route('admin.bookings.show', $booking)
+                ->with('error', 'Only confirmed bookings can be amended.');
+        }
+
+        $booking->load('details');
+
+        $dateId = (int) $request->validated('date_id');
+        $timeSlotId = (int) $request->validated('time_slot_id');
+
+        $availability = $this->bookingAmendmentService->checkAmendmentAvailability(
+            $booking,
+            $dateId,
+            $timeSlotId
+        );
+
+        if (!$availability['available']) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $availability['message']);
+        }
+
+        $success = $this->bookingAmendmentService->amendBooking($booking, $dateId, $timeSlotId);
+
+        if (!$success) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Failed to amend booking. Please try again.');
+        }
+
+        return redirect()
+            ->route('admin.bookings.show', $booking)
+            ->with('success', 'Booking successfully amended.');
+    }
+
+    public function checkAmendmentAvailability(Request $request, Booking $booking): JsonResponse
+    {
+        $request->validate([
+            'date_id' => 'required|exists:dates,id',
+            'time_slot_id' => 'required|exists:time_slots,id',
+        ]);
+
+        $booking->load('details');
+
+        $result = $this->bookingAmendmentService->checkAmendmentAvailability(
+            $booking,
+            (int) $request->input('date_id'),
+            (int) $request->input('time_slot_id')
+        );
+
+        return response()->json($result);
     }
 }

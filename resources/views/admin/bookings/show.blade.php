@@ -20,28 +20,34 @@
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-semibold text-grey-900">Booking Details</h2>
-            @switch($booking->status)
-                @case(\App\Models\Booking::STATUS_CONFIRMED)
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-success-100 text-success-700">
-                        {{ $booking->status_label }}
-                    </span>
-                    @break
-                @case(\App\Models\Booking::STATUS_PENDING_PAYMENT)
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-warning-100 text-warning-700">
-                        {{ $booking->status_label }}
-                    </span>
-                    @break
-                @case(\App\Models\Booking::STATUS_PAYMENT_FAILED)
-                @case(\App\Models\Booking::STATUS_CANCELLED)
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-danger-100 text-danger-700">
-                        {{ $booking->status_label }}
-                    </span>
-                    @break
-                @default
-                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-grey-100 text-grey-700">
-                        {{ $booking->status_label }}
-                    </span>
-            @endswitch
+            <div class="flex items-center gap-3">
+                @switch($booking->status)
+                    @case(\App\Models\Booking::STATUS_CONFIRMED)
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-success-100 text-success-700">
+                            {{ $booking->status_label }}
+                        </span>
+                        <a href="{{ route('admin.bookings.edit', $booking) }}"
+                           class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700">
+                            Amend Booking
+                        </a>
+                        @break
+                    @case(\App\Models\Booking::STATUS_PENDING_PAYMENT)
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-warning-100 text-warning-700">
+                            {{ $booking->status_label }}
+                        </span>
+                        @break
+                    @case(\App\Models\Booking::STATUS_PAYMENT_FAILED)
+                    @case(\App\Models\Booking::STATUS_CANCELLED)
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-danger-100 text-danger-700">
+                            {{ $booking->status_label }}
+                        </span>
+                        @break
+                    @default
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-grey-100 text-grey-700">
+                            {{ $booking->status_label }}
+                        </span>
+                @endswitch
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
