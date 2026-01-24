@@ -6,7 +6,7 @@
 
 @section('content')
     <div class="mb-4">
-        <a href="{{ route('admin.capacity.index') }}" class="text-primary-600 hover:text-primary-700 text-sm">
+        <a href="{{ route('admin.capacity.index') }}" class="inline-block px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
             Back to Capacity
         </a>
     </div>
@@ -24,10 +24,10 @@
                     </p>
                 </div>
                 <div class="flex gap-2">
-                    <button type="button" id="block-all" class="px-3 py-1.5 text-sm border border-danger-600 text-danger-600 rounded-lg hover:bg-danger-50">
+                    <button type="button" id="block-all" class="px-3 py-1.5 text-sm bg-danger-600 text-white rounded-lg hover:bg-danger-700">
                         Block All
                     </button>
-                    <button type="button" id="unblock-all" class="px-3 py-1.5 text-sm border border-success-600 text-success-600 rounded-lg hover:bg-success-50">
+                    <button type="button" id="unblock-all" class="px-3 py-1.5 text-sm bg-success-600 text-white rounded-lg hover:bg-success-700">
                         Unblock All
                     </button>
                 </div>
@@ -78,7 +78,7 @@
 
         <div class="flex justify-end gap-3">
             <a href="{{ route('admin.capacity.index') }}"
-               class="px-4 py-2 border border-grey-300 text-grey-700 rounded-lg hover:bg-grey-50">
+               class="px-4 py-2 bg-grey-600 text-white rounded-lg hover:bg-grey-700">
                 Cancel
             </a>
             <button type="submit"

@@ -12,20 +12,18 @@ return new class extends Migration
         // Delete existing records - old records have no slot info
         DB::table('blocked_tables')->truncate();
 
-        Schema::table('blocked_tables', function (Blueprint $table) {
-            // Drop foreign key on table_id first (MySQL uses unique index for FK)
-            $table->dropForeign(['table_id']);
-
-            // Drop existing unique constraint
-            $table->dropUnique(['table_id', 'date_id']);
-        });
+        // Drop constraints that may exist
+        $this->dropConstraintIfExists('blocked_tables', 'blocked_tables_table_id_foreign', 'foreign');
+        $this->dropConstraintIfExists('blocked_tables', 'blocked_tables_table_id_date_id_unique', 'unique');
 
         Schema::table('blocked_tables', function (Blueprint $table) {
-            // Add time_slot_id column
-            $table->foreignId('time_slot_id')
-                ->after('date_id')
-                ->constrained('time_slots')
-                ->cascadeOnDelete();
+            // Add time_slot_id column if not exists
+            if (!Schema::hasColumn('blocked_tables', 'time_slot_id')) {
+                $table->foreignId('time_slot_id')
+                    ->after('date_id')
+                    ->constrained('time_slots')
+                    ->cascadeOnDelete();
+            }
 
             // Re-add foreign key on table_id
             $table->foreign('table_id')
@@ -40,19 +38,20 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('blocked_tables', function (Blueprint $table) {
-            // Drop foreign keys first (MySQL requires this before dropping unique index)
-            $table->dropForeign(['table_id']);
-            $table->dropForeign(['time_slot_id']);
+        // Truncate to avoid duplicate constraint violations when restoring old unique key
+        DB::table('blocked_tables')->truncate();
 
-            // Drop unique constraint
-            $table->dropUnique(['table_id', 'date_id', 'time_slot_id']);
-
-            // Drop time_slot_id column
-            $table->dropColumn('time_slot_id');
-        });
+        // Drop constraints that may exist
+        $this->dropConstraintIfExists('blocked_tables', 'blocked_tables_table_id_foreign', 'foreign');
+        $this->dropConstraintIfExists('blocked_tables', 'blocked_tables_time_slot_id_foreign', 'foreign');
+        $this->dropConstraintIfExists('blocked_tables', 'blocked_tables_table_id_date_id_time_slot_id_unique', 'unique');
 
         Schema::table('blocked_tables', function (Blueprint $table) {
+            // Drop time_slot_id column if exists
+            if (Schema::hasColumn('blocked_tables', 'time_slot_id')) {
+                $table->dropColumn('time_slot_id');
+            }
+
             // Restore original unique constraint
             $table->unique(['table_id', 'date_id']);
 
@@ -62,5 +61,24 @@ return new class extends Migration
                 ->on('tables')
                 ->cascadeOnDelete();
         });
+    }
+
+    private function dropConstraintIfExists(string $table, string $name, string $type): void
+    {
+        $exists = DB::select("
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.TABLE_CONSTRAINTS
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = ?
+            AND CONSTRAINT_NAME = ?
+        ", [$table, $name]);
+
+        if (!empty($exists)) {
+            if ($type === 'foreign') {
+                Schema::table($table, fn (Blueprint $t) => $t->dropForeign($name));
+            } else {
+                Schema::table($table, fn (Blueprint $t) => $t->dropUnique($name));
+            }
+        }
     }
 };

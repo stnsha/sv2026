@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AmendBookingRequest;
 use App\Models\Booking;
 use App\Models\Date;
+use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\BookingAmendmentService;
 use App\Services\TableAssignmentService;
@@ -134,8 +135,24 @@ class BookingController extends Controller
 
         $dates = Date::orderBy('date_value')->get();
         $timeSlots = TimeSlot::all();
+        $allTables = Table::orderBy('capacity', 'desc')->orderBy('table_number')->get();
 
-        return view('admin.bookings.edit', compact('booking', 'dates', 'timeSlots'));
+        $availableTables = $this->bookingAmendmentService->getAvailableTablesForAmendment(
+            $booking,
+            $booking->date_id,
+            $booking->time_slot_id
+        );
+
+        $currentTableIds = $booking->tableBookings->pluck('table_id')->toArray();
+
+        return view('admin.bookings.edit', compact(
+            'booking',
+            'dates',
+            'timeSlots',
+            'allTables',
+            'availableTables',
+            'currentTableIds'
+        ));
     }
 
     public function update(AmendBookingRequest $request, Booking $booking): RedirectResponse
@@ -146,15 +163,17 @@ class BookingController extends Controller
                 ->with('error', 'Only confirmed bookings can be amended.');
         }
 
-        $booking->load('details');
+        $booking->load('details', 'tableBookings');
 
         $dateId = (int) $request->validated('date_id');
         $timeSlotId = (int) $request->validated('time_slot_id');
+        $tableIds = $request->validated('table_ids');
 
         $availability = $this->bookingAmendmentService->checkAmendmentAvailability(
             $booking,
             $dateId,
-            $timeSlotId
+            $timeSlotId,
+            $tableIds
         );
 
         if (!$availability['available']) {
@@ -164,7 +183,7 @@ class BookingController extends Controller
                 ->with('error', $availability['message']);
         }
 
-        $success = $this->bookingAmendmentService->amendBooking($booking, $dateId, $timeSlotId);
+        $success = $this->bookingAmendmentService->amendBooking($booking, $dateId, $timeSlotId, $tableIds);
 
         if (!$success) {
             return redirect()
@@ -183,15 +202,22 @@ class BookingController extends Controller
         $request->validate([
             'date_id' => 'required|exists:dates,id',
             'time_slot_id' => 'required|exists:time_slots,id',
+            'table_ids' => 'nullable|array',
+            'table_ids.*' => 'exists:tables,id',
         ]);
 
-        $booking->load('details');
+        $booking->load('details', 'tableBookings');
+
+        $tableIds = $request->input('table_ids');
 
         $result = $this->bookingAmendmentService->checkAmendmentAvailability(
             $booking,
             (int) $request->input('date_id'),
-            (int) $request->input('time_slot_id')
+            (int) $request->input('time_slot_id'),
+            $tableIds ? array_map('intval', $tableIds) : null
         );
+
+        $result['current_table_ids'] = $booking->tableBookings->pluck('table_id')->toArray();
 
         return response()->json($result);
     }

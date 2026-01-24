@@ -56,8 +56,14 @@
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-800 uppercase tracking-wider">
                             Time Slot
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-800 uppercase tracking-wider">
-                            Status
+                        <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-success-600 uppercase tracking-wider">
+                            Available
+                        </th>
+                        <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-primary-600 uppercase tracking-wider">
+                            Booked
+                        </th>
+                        <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-danger-600 uppercase tracking-wider">
+                            Blocked
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-800 uppercase tracking-wider">
                             Actions
@@ -87,38 +93,32 @@
                                         {{ $timeSlot->end_time->format('g:i A') }}
                                     </div>
                                 </td>
-                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
-                                    <div class="text-xs space-y-0.5">
-                                        <div class="text-success-600">
-                                            <span class="font-medium">{{ $summary['available_tables'] }}</span> table(s) available
-                                        </div>
-                                        @if($summary['confirmed_tables'] > 0)
-                                            <div class="text-primary-600">
-                                                <span class="font-medium">{{ $summary['confirmed_tables'] }}</span> table(s)booked
-                                            </div>
-                                        @endif
-                                        @if($summary['blocked_tables'] > 0)
-                                            <div class="text-danger-600">
-                                                <span class="font-medium">{{ $summary['blocked_tables'] }}</span> table(s)blocked
-                                            </div>
-                                        @endif
-                                    </div>
+                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-medium text-success-600">{{ $summary['available_tables'] }}</span>
                                 </td>
-                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('admin.bookings.by-date', ['date' => $date, 'timeSlot' => $timeSlot, 'from' => 'capacity']) }}"
-                                       class="text-primary-600 hover:text-primary-700 mr-3">
-                                        View Bookings
-                                    </a>
-                                    <a href="{{ route('admin.capacity.edit', ['date' => $date, 'timeSlot' => $timeSlot]) }}"
-                                       class="text-grey-600 hover:text-grey-700">
-                                        Edit
-                                    </a>
+                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-medium text-primary-600">{{ $summary['confirmed_tables'] }}</span>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="text-sm font-medium text-danger-600">{{ $summary['blocked_tables'] }}</span>
+                                </td>
+                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <a href="{{ route('admin.bookings.by-date', ['date' => $date, 'timeSlot' => $timeSlot, 'from' => 'capacity']) }}"
+                                           class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                                            View Bookings
+                                        </a>
+                                        <a href="{{ route('admin.capacity.edit', ['date' => $date, 'timeSlot' => $timeSlot]) }}"
+                                           class="px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
+                                            Edit
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 lg:px-6 py-8 text-center text-grey-500">
+                            <td colspan="6" class="px-4 lg:px-6 py-8 text-center text-grey-500">
                                 No dates found
                             </td>
                         </tr>

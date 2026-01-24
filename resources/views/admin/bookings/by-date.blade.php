@@ -6,15 +6,9 @@
 
 @section('content')
     <div class="mb-4">
-        @if(request()->query('from') === 'capacity')
-            <a href="{{ route('admin.capacity.index') }}" class="text-primary-600 hover:text-primary-700 text-sm">
-                Back to Capacity
-            </a>
-        @else
-            <a href="{{ route('admin.bookings.index') }}" class="text-primary-600 hover:text-primary-700 text-sm">
-                Back to Bookings
-            </a>
-        @endif
+        <a href="{{ route('admin.capacity.index') }}" class="inline-block px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
+            Back to Capacity
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -79,7 +73,7 @@
                                 </td>
                                 <td class="py-3 px-4 text-center">
                                     <a href="{{ route('admin.bookings.show', ['booking' => $booking, 'from' => request()->query('from')]) }}"
-                                       class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                                       class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                                         View
                                     </a>
                                 </td>

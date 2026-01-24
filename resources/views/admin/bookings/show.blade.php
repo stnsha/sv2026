@@ -6,15 +6,9 @@
 
 @section('content')
     <div class="mb-4">
-        @if(request()->query('from') === 'capacity')
-            <a href="{{ route('admin.bookings.by-date', ['date' => $booking->date, 'timeSlot' => $booking->timeSlot, 'from' => 'capacity']) }}" class="text-primary-600 hover:text-primary-700 text-sm">
-                Back to {{ $booking->date->formatted_date }} - {{ $booking->timeSlot->formatted_time }}
-            </a>
-        @else
-            <a href="{{ route('admin.bookings.index') }}" class="text-primary-600 hover:text-primary-700 text-sm">
-                Back to Bookings
-            </a>
-        @endif
+        <a href="{{ route('admin.capacity.index') }}" class="inline-block px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
+            Back to Capacity
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-6">

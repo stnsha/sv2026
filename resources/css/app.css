@@ -108,6 +108,12 @@
     --color-info-900: #32424B;
 }
 
+/* Minimum font size - override text-xs to be 14px */
+.text-xs {
+    font-size: 0.875rem !important; /* 14px instead of 12px */
+    line-height: 1.25rem !important;
+}
+
 /* Global cursor-pointer for interactive elements */
 button:not(:disabled),
 a[href],

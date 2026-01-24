@@ -140,7 +140,8 @@
                                 RM {{ number_format($booking->total, 2) }}
                             </td>
                             <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('admin.bookings.show', $booking) }}" class="text-primary-600 hover:text-primary-700">
+                                <a href="{{ route('admin.bookings.show', $booking) }}"
+                                   class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                                     View
                                 </a>
                             </td>
