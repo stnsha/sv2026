@@ -57,15 +57,15 @@
                             Time Slot
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-success-600 uppercase tracking-wider">
-                            Available
+                            Available Tables
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-primary-600 uppercase tracking-wider">
-                            Booked
+                            Booked Tables
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-danger-600 uppercase tracking-wider">
-                            Blocked
+                            Blocked Tables
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-800 uppercase tracking-wider">
+                        <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-grey-800 uppercase tracking-wider">
                             Actions
                         </th>
                     </tr>
@@ -110,7 +110,7 @@
                                         </a>
                                         <a href="{{ route('admin.capacity.edit', ['date' => $date, 'timeSlot' => $timeSlot]) }}"
                                            class="px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
-                                            Edit
+                                            Edit Tables
                                         </a>
                                     </div>
                                 </td>

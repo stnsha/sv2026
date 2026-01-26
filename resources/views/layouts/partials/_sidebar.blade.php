@@ -34,7 +34,7 @@
                 <li>
                     <a
                         href="{{ route('admin.capacity.index') }}"
-                        class="flex items-center gap-3 px-4 py-3 text-grey-900 hover:bg-grey-100 transition-all text-[13px] font-medium border-l-[3px] cursor-pointer {{ request()->routeIs('admin.capacity.*') || request()->query('from') === 'capacity' ? 'bg-grey-100 border-l-primary-600' : 'border-l-transparent' }}"
+                        class="flex items-center gap-3 px-4 py-3 text-grey-900 hover:bg-grey-100 transition-all text-[13px] font-medium border-l-[3px] cursor-pointer {{ request()->routeIs('admin.capacity.*') || request()->routeIs('admin.bookings.edit') || request()->query('from') === 'capacity' ? 'bg-grey-100 border-l-primary-600' : 'border-l-transparent' }}"
                     >
                         <svg class="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
