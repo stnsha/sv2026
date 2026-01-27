@@ -15,17 +15,15 @@
     <main x-data="bookingApp()" class="max-w-5xl mx-auto px-4 py-6 sm:py-10">
         {{-- Information Section with Hanging Logo --}}
         <section class="mb-8 relative" aria-label="Maklumat lokasi dan waktu operasi">
-            {{-- Hanging Logo --}}
-            <div class="flex justify-center mb-[-40px] sm:mb-[-48px] relative z-10">
-                <img src="{{ asset('img/logo.PNG') }}" alt="Sandvillage" class="h-20 sm:h-24">
-            </div>
-
             {{-- Information Card --}}
-            <div class="rounded-2xl pt-12 sm:pt-14 px-5 pb-5 sm:px-6 sm:pb-6 shadow-lg" style="background-color: #F5E6C6;">
-                {{-- SEO Text --}}
-                <p class="text-[14px] md:text-[16px] text-[#5B3924] leading-relaxed text-justify mb-6">
-                    Port <span class="font-semibold">steamboat</span> dan <span class="font-semibold">BBQ grill</span> terbaik di Seremban yang menawarkan konsep makan sepuas hati (unlimited buffet) dengan pilihan daging tanpa had, dim sum, pasta, dan pencuci mulut. Destinasi ini sangat sesuai untuk mereka yang mencari pengalaman makan lengkap, berbaloi, dan sedap.
-                </p>
+            <div class="rounded-2xl px-5 py-5 sm:px-6 sm:py-6 shadow-lg" style="background-color: #F5E6C6;">
+                {{-- Logo & SEO Text --}}
+                <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 mb-6">
+                    <img src="{{ asset('img/logo.PNG') }}" alt="Sandvillage" class="h-20 sm:h-24 flex-shrink-0">
+                    <p class="text-[14px] md:text-[16px] text-[#5B3924] leading-relaxed text-justify">
+                        Port <span class="font-semibold">steamboat</span> dan <span class="font-semibold">BBQ grill</span> terbaik di Seremban yang menawarkan konsep makan sepuas hati (unlimited buffet) dengan pilihan daging tanpa had, dim sum, pasta, dan pencuci mulut. Destinasi ini sangat sesuai untuk mereka yang mencari pengalaman makan lengkap, berbaloi, dan sedap.
+                    </p>
+                </div>
 
                 {{-- Info Pills --}}
                 <div class="space-y-3 mb-6">
@@ -241,7 +239,7 @@
 
                 {{-- Summary & Total --}}
                 <div class="mb-6 flex justify-end">
-                    <div class="space-y-2 min-w-[280px]">
+                    <div class="space-y-2 min-w-[300px]">
                         <div x-show="selectedDate && selectedTimeSlot" x-cloak
                              class="flex items-center justify-between gap-6 rounded-lg px-4 py-2.5 shadow-md" style="background-color: #FFFFFF;">
                             <span class="text-[14px] font-medium text-[#5B3924] tracking-[0.05em]">Tarikh</span>
