@@ -28,7 +28,7 @@ class CapacityController extends Controller
             $datesQuery->where('id', $request->input('date'));
         }
 
-        $dates = $datesQuery->paginate(15)->withQueryString();
+        $dates = $datesQuery->paginate(5)->withQueryString();
 
         $allTimeSlots = TimeSlot::all();
 
