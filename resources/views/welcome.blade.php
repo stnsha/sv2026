@@ -298,7 +298,7 @@
                 soldOutDates: @json($soldOutDates),
                 dateLabels: {
                     @foreach($dates as $date)
-                        {{ $date->id }}: "{{ $date->date_value->locale('ms')->isoFormat('ddd, D MMM') }}",
+                        {{ $date->id }}: "{{ $date->date_value->locale('ms')->isoFormat('dddd, D MMM YYYY') }}",
                     @endforeach
                 },
                 timeSlotLabels: {
