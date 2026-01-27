@@ -16,23 +16,17 @@ class DashboardController extends Controller
             ->where('date_value', now()->toDateString())
             ->first();
 
-        $todayBookings = 0;
+        $todayRevenue = 0;
         if ($today) {
-            $todayBookings = Booking::query()
+            $todayRevenue = Booking::query()
                 ->where('date_id', $today->id)
                 ->where('status', Booking::STATUS_CONFIRMED)
-                ->count();
+                ->sum('total');
         }
 
-        $startOfWeek = now()->startOfWeek();
-        $endOfWeek = now()->endOfWeek();
-
-        $weeklyRevenue = Booking::query()
+        $confirmedBookings = Booking::query()
             ->where('status', Booking::STATUS_CONFIRMED)
-            ->whereHas('date', function ($query) use ($startOfWeek, $endOfWeek) {
-                $query->whereBetween('date_value', [$startOfWeek->toDateString(), $endOfWeek->toDateString()]);
-            })
-            ->sum('total');
+            ->count();
 
         $totalCustomers = Customer::count();
 
@@ -43,8 +37,8 @@ class DashboardController extends Controller
             ->get();
 
         return view('admin.dashboard.index', [
-            'todayBookings' => $todayBookings,
-            'weeklyRevenue' => $weeklyRevenue,
+            'todayRevenue' => $todayRevenue,
+            'confirmedBookings' => $confirmedBookings,
             'totalCustomers' => $totalCustomers,
             'recentBookings' => $recentBookings,
         ]);

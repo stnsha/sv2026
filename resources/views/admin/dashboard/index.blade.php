@@ -7,44 +7,44 @@
 @section('content')
     <!-- Bento-style stats cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-        <!-- Today's Bookings Card -->
+        <!-- Today's Revenue Card -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-secondary-400">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-grey-500 mb-1">Today's Bookings</p>
-                    <p class="text-3xl font-bold text-grey-900">{{ $todayBookings }}</p>
-                    <p class="text-xs text-grey-400 mt-1">Confirmed reservations</p>
-                </div>
-                <div class="p-3 bg-secondary-100 rounded-lg">
-                    <img src="{{ asset('img/tracking_13333232.png') }}" alt="Bookings" class="w-10 h-10">
-                </div>
-            </div>
-        </div>
-
-        <!-- Weekly Revenue Card -->
-        <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-secondary-400">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-grey-500 mb-1">Weekly Revenue</p>
-                    <p class="text-3xl font-bold text-grey-900">RM {{ number_format($weeklyRevenue, 2) }}</p>
+                    <p class="text-sm text-grey-500 mb-1">Today's Revenue</p>
+                    <p class="text-3xl font-bold text-grey-900">RM {{ number_format($todayRevenue, 2) }}</p>
                     <p class="text-xs text-grey-400 mt-1">From confirmed bookings</p>
                 </div>
                 <div class="p-3 bg-secondary-100 rounded-lg">
-                    <img src="{{ asset('img/extra-time_8727099.png') }}" alt="Revenue" class="w-10 h-10">
+                    <img src="{{ asset('img/revenue.png') }}" alt="Revenue" class="w-10 h-10">
                 </div>
             </div>
         </div>
 
-        <!-- Total Customers Card -->
+        <!-- Confirmed Bookings Card -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-secondary-400">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-grey-500 mb-1">Total Customers</p>
+                    <p class="text-sm text-grey-500 mb-1">Confirmed Bookings</p>
+                    <p class="text-3xl font-bold text-grey-900">{{ $confirmedBookings }}</p>
+                    <p class="text-xs text-grey-400 mt-1">All-time confirmed</p>
+                </div>
+                <div class="p-3 bg-secondary-100 rounded-lg">
+                    <img src="{{ asset('img/booking.png') }}" alt="Bookings" class="w-10 h-10">
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Card -->
+        <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-secondary-400">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-grey-500 mb-1">Customers</p>
                     <p class="text-3xl font-bold text-grey-900">{{ $totalCustomers }}</p>
                     <p class="text-xs text-grey-400 mt-1">Registered customers</p>
                 </div>
                 <div class="p-3 bg-secondary-100 rounded-lg">
-                    <img src="{{ asset('img/family_3010442.png') }}" alt="Customers" class="w-10 h-10">
+                    <img src="{{ asset('img/users.png') }}" alt="Customers" class="w-10 h-10">
                 </div>
             </div>
         </div>
