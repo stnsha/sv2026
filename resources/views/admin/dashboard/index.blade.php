@@ -58,7 +58,7 @@
                     <h2 class="text-lg font-semibold text-grey-900">Recent Bookings</h2>
                     <p class="text-sm text-grey-500">Latest reservation activity</p>
                 </div>
-                <a href="{{ route('admin.bookings.index') }}" class="text-sm text-primary-600 hover:text-primary-700 hover:underline">
+                <a href="{{ route('admin.customers.index') }}" class="text-sm text-primary-600 hover:text-primary-700 hover:underline">
                     View all
                 </a>
             </div>
@@ -73,17 +73,15 @@
                                 Date
                             </th>
                             <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden md:table-cell">
-                                Time
+                                Time Slot
                             </th>
                             <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-500 uppercase tracking-wider hidden sm:table-cell">
+                            <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-grey-500 uppercase tracking-wider hidden sm:table-cell">
                                 Total
                             </th>
-                            <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-500 uppercase tracking-wider">
-                                <span class="sr-only">Actions</span>
-                            </th>
+                            <th class="px-4 lg:px-6 py-3"></th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-grey-200">
@@ -132,7 +130,7 @@
                                             </span>
                                     @endswitch
                                 </td>
-                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-grey-600 text-right hidden sm:table-cell">
+                                <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-grey-600 text-center hidden sm:table-cell">
                                     RM {{ number_format($booking->total, 2) }}
                                 </td>
                                 <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
