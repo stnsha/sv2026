@@ -17,6 +17,24 @@
         </div>
     </div>
 
+    <!-- Filters -->
+    <x-table-filter
+        :route="route('admin.capacity.index')"
+        :filters="[
+            [
+                'name' => 'date',
+                'placeholder' => 'All Dates',
+                'options' => $dateFilterOptions,
+            ],
+            [
+                'name' => 'time_slot',
+                'placeholder' => 'All Time Slots',
+                'options' => $timeSlotFilterOptions,
+            ],
+        ]"
+        :showSearch="false"
+    />
+
     @if(session('success'))
         <div class="mb-4 p-4 bg-success-100 border border-success-200 text-success-700 rounded-lg">
             {{ session('success') }}
@@ -72,11 +90,11 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-grey-200">
                     @forelse($dates as $date)
-                        @foreach($timeSlots as $index => $timeSlot)
+                        @foreach($filteredTimeSlots as $index => $timeSlot)
                             @php $summary = $dateSummaries[$date->id][$timeSlot->id]; @endphp
                             <tr class="hover:bg-grey-50 {{ $index > 0 ? 'border-t border-grey-100' : '' }}">
-                                @if($index === 0)
-                                    <td class="px-4 lg:px-6 py-4 whitespace-nowrap align-top" rowspan="{{ $timeSlots->count() }}">
+                                @if($loop->first)
+                                    <td class="px-4 lg:px-6 py-4 whitespace-nowrap align-top" rowspan="{{ $filteredTimeSlots->count() }}">
                                         <div class="text-sm font-medium text-grey-900">
                                             {{ $date->date_value->format('l') }}
                                         </div>
