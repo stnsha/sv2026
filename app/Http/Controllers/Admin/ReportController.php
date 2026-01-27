@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Customer;
-use App\Models\Date;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ReportController extends Controller
@@ -25,18 +23,14 @@ class ReportController extends Controller
 
         $thisMonthRevenue = Booking::query()
             ->where('status', Booking::STATUS_CONFIRMED)
-            ->whereHas('date', function ($query) {
-                $query->whereMonth('date_value', now()->month)
-                    ->whereYear('date_value', now()->year);
-            })
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
             ->sum('total');
 
         $thisMonthBookings = Booking::query()
             ->where('status', Booking::STATUS_CONFIRMED)
-            ->whereHas('date', function ($query) {
-                $query->whereMonth('date_value', now()->month)
-                    ->whereYear('date_value', now()->year);
-            })
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
             ->count();
 
         $totalCustomers = Customer::count();
@@ -70,16 +64,13 @@ class ReportController extends Controller
             $date = now()->subMonths($i);
             $month = $date->format('F Y');
 
-            $bookings = Booking::query()
+            $query = Booking::query()
                 ->where('status', Booking::STATUS_CONFIRMED)
-                ->whereHas('date', function ($query) use ($date) {
-                    $query->whereMonth('date_value', $date->month)
-                        ->whereYear('date_value', $date->year);
-                })
-                ->get();
+                ->whereMonth('created_at', $date->month)
+                ->whereYear('created_at', $date->year);
 
-            $bookingCount = $bookings->count();
-            $revenue = $bookings->sum('total');
+            $bookingCount = (clone $query)->count();
+            $revenue = (clone $query)->sum('total');
             $average = $bookingCount > 0 ? $revenue / $bookingCount : 0;
 
             $stats[] = [

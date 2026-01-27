@@ -59,11 +59,11 @@
     <!-- Additional Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-4">
-            <p class="text-sm text-grey-500">This Month Revenue</p>
+            <p class="text-sm text-grey-500">Monthly Revenue</p>
             <p class="text-xl font-bold text-grey-900">RM {{ number_format($thisMonthRevenue, 2) }}</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-4">
-            <p class="text-sm text-grey-500">This Month Bookings</p>
+            <p class="text-sm text-grey-500">Monthly Bookings</p>
             <p class="text-xl font-bold text-grey-900">{{ $thisMonthBookings }}</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-4">
