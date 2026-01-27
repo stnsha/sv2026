@@ -239,6 +239,18 @@
                      x-text="availabilityMessage">
                 </div>
 
+                {{-- Selected Date & Time Summary --}}
+                <div x-show="selectedDate && selectedTimeSlot" x-cloak class="mb-4 space-y-2">
+                    <div class="flex items-center justify-between rounded-lg px-4 py-2.5 shadow-md" style="background-color: #FFFFFF;">
+                        <span class="text-[14px] font-medium text-[#5B3924] tracking-[0.05em]">Tarikh</span>
+                        <span class="text-[14px] font-semibold text-[#5B3924]" x-text="dateLabels[selectedDate] || ''"></span>
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg px-4 py-2.5 shadow-md" style="background-color: #FFFFFF;">
+                        <span class="text-[14px] font-medium text-[#5B3924] tracking-[0.05em]">Slot Masa</span>
+                        <span class="text-[14px] font-semibold text-[#5B3924]" x-text="timeSlotLabels[selectedTimeSlot] || ''"></span>
+                    </div>
+                </div>
+
                 {{-- Total --}}
                 <div class="mb-6">
                     <div class="flex items-center justify-end gap-4">
@@ -288,6 +300,16 @@
                 },
                 slotAvailability: @json($slotAvailability),
                 soldOutDates: @json($soldOutDates),
+                dateLabels: {
+                    @foreach($dates as $date)
+                        {{ $date->id }}: "{{ $date->date_value->locale('ms')->isoFormat('ddd, D MMM') }}",
+                    @endforeach
+                },
+                timeSlotLabels: {
+                    @foreach($timeSlots as $slot)
+                        {{ $slot->id }}: "{{ $slot->formatted_time }}",
+                    @endforeach
+                },
 
                 init() {
                     window.addEventListener('resize', () => {
