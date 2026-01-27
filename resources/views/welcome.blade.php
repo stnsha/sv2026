@@ -20,7 +20,7 @@
                 {{-- Logo & SEO Text --}}
                 <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 mb-6">
                     <img src="{{ asset('img/logo.PNG') }}" alt="Sandvillage" class="h-20 sm:h-24 flex-shrink-0">
-                    <p class="text-[14px] md:text-[16px] text-[#5B3924] leading-relaxed text-justify">
+                    <p class="text-[12px] md:text-[13px] text-[#5B3924] leading-relaxed text-justify">
                         Port <span class="font-semibold">steamboat</span> dan <span class="font-semibold">BBQ grill</span> terbaik di Seremban yang menawarkan konsep makan sepuas hati (unlimited buffet) dengan pilihan daging tanpa had, dim sum, pasta, dan pencuci mulut. Destinasi ini sangat sesuai untuk mereka yang mencari pengalaman makan lengkap, berbaloi, dan sedap.
                     </p>
                 </div>
