@@ -6,6 +6,7 @@ use App\Models\BlockedTable;
 use App\Models\Booking;
 use App\Models\Table;
 use App\Models\TableBooking;
+use App\Models\TableCapacityOverride;
 use Illuminate\Support\Collection;
 
 class TableAssignmentService
@@ -14,11 +15,13 @@ class TableAssignmentService
     {
         $availableTables = $this->getAvailableTables($dateId, $timeSlotId);
 
-        $sixSeaters = $availableTables->where('capacity', 6)->values();
-        $fourSeaters = $availableTables->where('capacity', 4)->values();
+        $sixSeaters = $availableTables->where('effective_capacity', 6)->values();
+        $fourSeaters = $availableTables->where('effective_capacity', 4)->values();
+        $twoSeaters = $availableTables->where('effective_capacity', 2)->values();
 
         $maxSixSeaters = $sixSeaters->count();
         $maxFourSeaters = $fourSeaters->count();
+        $maxTwoSeaters = $twoSeaters->count();
 
         $bestCombination = null;
         $minWaste = PHP_INT_MAX;
@@ -26,27 +29,30 @@ class TableAssignmentService
 
         for ($numSix = 0; $numSix <= $maxSixSeaters; $numSix++) {
             for ($numFour = 0; $numFour <= $maxFourSeaters; $numFour++) {
-                $totalCapacity = ($numSix * 6) + ($numFour * 4);
+                for ($numTwo = 0; $numTwo <= $maxTwoSeaters; $numTwo++) {
+                    $totalCapacity = ($numSix * 6) + ($numFour * 4) + ($numTwo * 2);
 
-                if ($totalCapacity >= $totalPax) {
-                    $waste = $totalCapacity - $totalPax;
-                    $totalTables = $numSix + $numFour;
+                    if ($totalCapacity >= $totalPax) {
+                        $waste = $totalCapacity - $totalPax;
+                        $totalTables = $numSix + $numFour + $numTwo;
 
-                    $isBetter = $waste < $minWaste
-                        || ($waste === $minWaste && $totalTables < $minTables);
+                        $isBetter = $waste < $minWaste
+                            || ($waste === $minWaste && $totalTables < $minTables);
 
-                    if ($isBetter) {
-                        $minWaste = $waste;
-                        $minTables = $totalTables;
-                        $bestCombination = [
-                            'six_seaters' => $numSix,
-                            'four_seaters' => $numFour,
-                            'total_capacity' => $totalCapacity,
-                            'waste' => $waste,
-                        ];
+                        if ($isBetter) {
+                            $minWaste = $waste;
+                            $minTables = $totalTables;
+                            $bestCombination = [
+                                'six_seaters' => $numSix,
+                                'four_seaters' => $numFour,
+                                'two_seaters' => $numTwo,
+                                'total_capacity' => $totalCapacity,
+                                'waste' => $waste,
+                            ];
+                        }
+
+                        break;
                     }
-
-                    break;
                 }
             }
         }
@@ -62,11 +68,15 @@ class TableAssignmentService
         $selectedTables = $selectedTables->merge(
             $fourSeaters->take($bestCombination['four_seaters'])
         );
+        $selectedTables = $selectedTables->merge(
+            $twoSeaters->take($bestCombination['two_seaters'])
+        );
 
         return [
             'tables' => $selectedTables,
             'six_seaters' => $bestCombination['six_seaters'],
             'four_seaters' => $bestCombination['four_seaters'],
+            'two_seaters' => $bestCombination['two_seaters'],
             'total_capacity' => $bestCombination['total_capacity'],
             'waste' => $bestCombination['waste'],
         ];
@@ -91,11 +101,21 @@ class TableAssignmentService
             ->where('time_slot_id', $timeSlotId)
             ->pluck('table_id');
 
-        return Table::query()
+        $capacityOverrides = TableCapacityOverride::query()
+            ->where('date_id', $dateId)
+            ->where('time_slot_id', $timeSlotId)
+            ->pluck('effective_capacity', 'table_id');
+
+        $tables = Table::query()
             ->whereNotIn('id', $bookedTableIds)
             ->whereNotIn('id', $blockedTableIds)
-            ->orderBy('capacity', 'desc')
             ->get();
+
+        $tables->each(function ($table) use ($capacityOverrides) {
+            $table->effective_capacity = $capacityOverrides->get($table->id, $table->capacity);
+        });
+
+        return $tables->sortByDesc('effective_capacity')->values();
     }
 
     public function getAvailabilitySummary(int $dateId, int $timeSlotId): array
@@ -105,8 +125,11 @@ class TableAssignmentService
 
         $totalSixSeaters = $allTables->where('capacity', 6)->count();
         $totalFourSeaters = $allTables->where('capacity', 4)->count();
-        $availableSixSeaters = $availableTables->where('capacity', 6)->count();
-        $availableFourSeaters = $availableTables->where('capacity', 4)->count();
+        $availableSixSeaters = $availableTables->where('effective_capacity', 6)->count();
+        $availableFourSeaters = $availableTables->where('effective_capacity', 4)->count();
+        $availableTwoSeaters = $availableTables->where('effective_capacity', 2)->count();
+
+        $availableCapacity = ($availableSixSeaters * 6) + ($availableFourSeaters * 4) + ($availableTwoSeaters * 2);
 
         return [
             'total_tables' => $allTables->count(),
@@ -118,8 +141,9 @@ class TableAssignmentService
             'total_four_seaters' => $totalFourSeaters,
             'available_four_seaters' => $availableFourSeaters,
             'booked_four_seaters' => $totalFourSeaters - $availableFourSeaters,
+            'available_two_seaters' => $availableTwoSeaters,
             'total_capacity' => ($totalSixSeaters * 6) + ($totalFourSeaters * 4),
-            'available_capacity' => ($availableSixSeaters * 6) + ($availableFourSeaters * 4),
+            'available_capacity' => $availableCapacity,
         ];
     }
 }

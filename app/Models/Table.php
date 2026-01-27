@@ -26,4 +26,9 @@ class Table extends Model
     {
         return $this->hasMany(BlockedTable::class);
     }
+
+    public function capacityOverrides(): HasMany
+    {
+        return $this->hasMany(TableCapacityOverride::class);
+    }
 }

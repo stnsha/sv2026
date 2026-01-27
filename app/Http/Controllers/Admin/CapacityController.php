@@ -52,6 +52,7 @@ class CapacityController extends Controller
         $tables = Table::query()->orderBy('table_number')->get();
         $blockedTableIds = $this->capacityService->getBlockedTableIds($date->id, $timeSlot->id);
         $bookedTableIds = $this->capacityService->getBookedTableIds($date->id, $timeSlot->id);
+        $capacityOverrides = $this->capacityService->getCapacityOverrides($date->id, $timeSlot->id);
 
         return view('admin.capacity.edit', [
             'date' => $date,
@@ -59,6 +60,7 @@ class CapacityController extends Controller
             'tables' => $tables,
             'blockedTableIds' => $blockedTableIds,
             'bookedTableIds' => $bookedTableIds,
+            'capacityOverrides' => $capacityOverrides,
         ]);
     }
 
@@ -67,13 +69,18 @@ class CapacityController extends Controller
         $validated = $request->validate([
             'blocked_tables' => 'nullable|array',
             'blocked_tables.*' => 'exists:tables,id',
+            'capacity_overrides' => 'nullable|array',
+            'capacity_overrides.*' => 'nullable|integer|min:2',
         ]);
 
         $blockedTableIds = $validated['blocked_tables'] ?? [];
         $this->capacityService->syncBlockedTablesForSlot($date->id, $timeSlot->id, $blockedTableIds);
 
+        $capacityOverrides = $validated['capacity_overrides'] ?? [];
+        $this->capacityService->syncCapacityOverridesForSlot($date->id, $timeSlot->id, $capacityOverrides);
+
         return redirect()
             ->route('admin.capacity.index')
-            ->with('success', 'Blocked tables updated for ' . $date->formatted_date . ' - ' . $timeSlot->formatted_time);
+            ->with('success', 'Table settings updated for ' . $date->formatted_date . ' - ' . $timeSlot->formatted_time);
     }
 }
