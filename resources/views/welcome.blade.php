@@ -241,7 +241,7 @@
 
                 {{-- Summary & Total --}}
                 <div class="mb-6 flex justify-end">
-                    <div class="space-y-2">
+                    <div class="space-y-2 min-w-[280px]">
                         <div x-show="selectedDate && selectedTimeSlot" x-cloak
                              class="flex items-center justify-between gap-6 rounded-lg px-4 py-2.5 shadow-md" style="background-color: #FFFFFF;">
                             <span class="text-[14px] font-medium text-[#5B3924] tracking-[0.05em]">Tarikh</span>
