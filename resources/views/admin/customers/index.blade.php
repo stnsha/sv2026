@@ -166,7 +166,7 @@
                                                         </td>
                                                         <td class="px-3 py-2 text-grey-600 text-right">RM {{ number_format($booking->total, 2) }}</td>
                                                         <td class="px-3 py-2 text-right">
-                                                            <a href="{{ route('admin.bookings.show', $booking) }}"
+                                                            <a href="{{ route('admin.bookings.show', ['booking' => $booking, 'from' => 'customers']) }}"
                                                                @click.stop
                                                                class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                                                                 View
