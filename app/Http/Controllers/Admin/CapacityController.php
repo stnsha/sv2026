@@ -22,12 +22,20 @@ class CapacityController extends Controller
         $sortDirection = $request->input('sort', 'asc');
         $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
 
-        $dates = Date::query()
-            ->orderBy('date_value', $sortDirection)
-            ->paginate(15)
-            ->withQueryString();
+        $datesQuery = Date::query()->orderBy('date_value', $sortDirection);
 
-        $timeSlots = TimeSlot::all();
+        if ($request->filled('date')) {
+            $datesQuery->where('id', $request->input('date'));
+        }
+
+        $dates = $datesQuery->paginate(15)->withQueryString();
+
+        $allTimeSlots = TimeSlot::all();
+
+        $filteredTimeSlots = $request->filled('time_slot')
+            ? $allTimeSlots->where('id', (int) $request->input('time_slot'))
+            : $allTimeSlots;
+
         $allTables = Table::all();
         $totalTables = $allTables->count();
         $totalCapacity = $allTables->sum('capacity');
@@ -37,13 +45,20 @@ class CapacityController extends Controller
             $dateSummaries[$date->id] = $this->capacityService->getDateCapacitySummaryBySlot($date);
         }
 
+        $allDates = Date::query()->orderBy('date_value')->get();
+        $dateFilterOptions = $allDates->pluck('formatted_date', 'id')->toArray();
+        $timeSlotFilterOptions = $allTimeSlots->pluck('formatted_time', 'id')->toArray();
+
         return view('admin.capacity.index', [
             'dates' => $dates,
-            'timeSlots' => $timeSlots,
+            'timeSlots' => $allTimeSlots,
+            'filteredTimeSlots' => $filteredTimeSlots,
             'dateSummaries' => $dateSummaries,
             'totalTables' => $totalTables,
             'totalCapacity' => $totalCapacity,
             'sortDirection' => $sortDirection,
+            'dateFilterOptions' => $dateFilterOptions,
+            'timeSlotFilterOptions' => $timeSlotFilterOptions,
         ]);
     }
 
