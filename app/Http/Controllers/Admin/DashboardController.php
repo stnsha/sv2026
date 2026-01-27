@@ -11,8 +11,7 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        $todayRevenue = Booking::query()
-            ->whereDate('created_at', now()->toDateString())
+        $totalRevenue = Booking::query()
             ->where('status', Booking::STATUS_CONFIRMED)
             ->sum('total');
 
@@ -29,7 +28,7 @@ class DashboardController extends Controller
             ->get();
 
         return view('admin.dashboard.index', [
-            'todayRevenue' => $todayRevenue,
+            'totalRevenue' => $totalRevenue,
             'confirmedBookings' => $confirmedBookings,
             'totalCustomers' => $totalCustomers,
             'recentBookings' => $recentBookings,

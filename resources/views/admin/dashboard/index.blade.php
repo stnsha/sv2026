@@ -7,12 +7,12 @@
 @section('content')
     <!-- Bento-style stats cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-        <!-- Today's Revenue Card -->
+        <!-- Total Revenue Card -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-secondary-400">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-grey-500 mb-1">Today's Revenue</p>
-                    <p class="text-3xl font-bold text-grey-900">RM {{ number_format($todayRevenue, 2) }}</p>
+                    <p class="text-sm text-grey-500 mb-1">Total Revenue</p>
+                    <p class="text-3xl font-bold text-grey-900">RM {{ number_format($totalRevenue, 2) }}</p>
                     <p class="text-xs text-grey-400 mt-1">From confirmed bookings</p>
                 </div>
                 <div class="p-3 bg-secondary-100 rounded-lg">
