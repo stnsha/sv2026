@@ -122,6 +122,7 @@
                                                     <th class="px-3 py-2 text-left text-xs font-medium text-grey-500 uppercase hidden md:table-cell">Time Slot</th>
                                                     <th class="px-3 py-2 text-left text-xs font-medium text-grey-500 uppercase">Status</th>
                                                     <th class="px-3 py-2 text-right text-xs font-medium text-grey-500 uppercase">Total</th>
+                                                    <th class="px-3 py-2 text-right text-xs font-medium text-grey-500 uppercase"></th>
                                                 </tr>
                                             </thead>
                                             <tbody class="divide-y divide-grey-100">
@@ -164,6 +165,13 @@
                                                             @endswitch
                                                         </td>
                                                         <td class="px-3 py-2 text-grey-600 text-right">RM {{ number_format($booking->total, 2) }}</td>
+                                                        <td class="px-3 py-2 text-right">
+                                                            <a href="{{ route('admin.bookings.show', $booking) }}"
+                                                               @click.stop
+                                                               class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                                                                View
+                                                            </a>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
