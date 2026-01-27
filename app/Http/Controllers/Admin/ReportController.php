@@ -60,9 +60,8 @@ class ReportController extends Controller
     {
         $stats = [];
 
-        for ($i = 5; $i >= 0; $i--) {
+        for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $month = $date->format('F Y');
 
             $query = Booking::query()
                 ->where('status', Booking::STATUS_CONFIRMED)
@@ -70,11 +69,16 @@ class ReportController extends Controller
                 ->whereYear('created_at', $date->year);
 
             $bookingCount = (clone $query)->count();
+
+            if ($bookingCount === 0) {
+                continue;
+            }
+
             $revenue = (clone $query)->sum('total');
-            $average = $bookingCount > 0 ? $revenue / $bookingCount : 0;
+            $average = $revenue / $bookingCount;
 
             $stats[] = [
-                'month' => $month,
+                'month' => $date->format('F Y'),
                 'bookings' => $bookingCount,
                 'revenue' => $revenue,
                 'average' => $average,

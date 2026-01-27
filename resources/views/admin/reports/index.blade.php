@@ -80,7 +80,7 @@
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-4 lg:px-6 py-4 border-b border-grey-200">
             <h2 class="text-lg font-semibold text-grey-900">Monthly Summary</h2>
-            <p class="text-sm text-grey-500">Performance over the last 6 months</p>
+            <p class="text-sm text-grey-500">Performance over the last 12 months</p>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-grey-200">
