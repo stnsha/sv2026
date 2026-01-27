@@ -12,7 +12,11 @@ class CustomerController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Customer::query()->withCount('bookings');
+        $query = Customer::query()
+            ->withCount('bookings')
+            ->with(['bookings' => function ($q) {
+                $q->latest()->with(['date', 'timeSlot']);
+            }]);
 
         // Search by name, email, phone
         if ($search = $request->input('search')) {
