@@ -1,7 +1,10 @@
 @extends('layouts.dashboard')
 
 @section('title', 'Bookings for ' . $date->formatted_date)
-@section('page-title', $date->formatted_date . ' - ' . $timeSlot->formatted_time)
+@section('page-title')
+    {{ $date->formatted_date }}
+    <span class="block text-lg font-medium text-grey-500">Slot {{ $timeSlot->id }}: {{ $timeSlot->formatted_time }}</span>
+@endsection
 @section('page-description', 'View bookings for this time slot')
 
 @section('content')
