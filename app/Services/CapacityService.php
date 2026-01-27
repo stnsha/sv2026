@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Date;
 use App\Models\Table;
 use App\Models\TableBooking;
+use App\Models\TableCapacityOverride;
 use App\Models\TimeSlot;
 
 class CapacityService
@@ -127,5 +128,40 @@ class CapacityService
             ->where('time_slot_id', $timeSlotId)
             ->pluck('table_id')
             ->toArray();
+    }
+
+    public function getCapacityOverrides(int $dateId, int $timeSlotId): array
+    {
+        return TableCapacityOverride::query()
+            ->where('date_id', $dateId)
+            ->where('time_slot_id', $timeSlotId)
+            ->pluck('effective_capacity', 'table_id')
+            ->toArray();
+    }
+
+    public function syncCapacityOverridesForSlot(int $dateId, int $timeSlotId, array $overrides): void
+    {
+        TableCapacityOverride::query()
+            ->where('date_id', $dateId)
+            ->where('time_slot_id', $timeSlotId)
+            ->delete();
+
+        foreach ($overrides as $tableId => $effectiveCapacity) {
+            if ($effectiveCapacity === null) {
+                continue;
+            }
+
+            $table = Table::find($tableId);
+            if ($table === null || (int) $effectiveCapacity >= $table->capacity) {
+                continue;
+            }
+
+            TableCapacityOverride::create([
+                'table_id' => $tableId,
+                'date_id' => $dateId,
+                'time_slot_id' => $timeSlotId,
+                'effective_capacity' => (int) $effectiveCapacity,
+            ]);
+        }
     }
 }
