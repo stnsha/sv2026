@@ -128,7 +128,7 @@
                                             <tbody class="divide-y divide-grey-100">
                                                 @foreach($customer->bookings as $booking)
                                                     <tr>
-                                                        <td class="px-3 py-2 text-grey-700 font-mono">{{ $booking->reference_id }}</td>
+                                                        <td class="px-3 py-2 text-grey-700">{{ $booking->reference_id }}</td>
                                                         <td class="px-3 py-2 text-grey-600">{{ $booking->date->formatted_date ?? '-' }}</td>
                                                         <td class="px-3 py-2 text-grey-600 hidden md:table-cell">{{ $booking->timeSlot->formatted_time ?? '-' }}</td>
                                                         <td class="px-3 py-2">
