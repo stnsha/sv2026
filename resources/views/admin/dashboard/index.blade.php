@@ -81,7 +81,9 @@
                             <th class="px-4 lg:px-6 py-3 text-center text-xs font-medium text-grey-500 uppercase tracking-wider hidden sm:table-cell">
                                 Total
                             </th>
-                            <th class="px-4 lg:px-6 py-3"></th>
+                            <th class="px-4 lg:px-6 py-3 text-right text-xs font-medium text-grey-500 uppercase tracking-wider">
+                                Actions
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-grey-200">
