@@ -103,6 +103,8 @@ class ToyyibPayService
         return [
             'bill_code' => $data['billcode'] ?? null,
             'status_id' => $data['status_id'] ?? null,
+            'reason' => $data['msg'] ?? null,
+            'transaction_id' => $data['transaction_id'] ?? null,
             'is_paid' => ($data['status_id'] ?? null) === '1',
         ];
     }

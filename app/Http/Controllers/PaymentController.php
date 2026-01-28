@@ -83,7 +83,7 @@ class PaymentController extends Controller
         if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
             $this->bookingService->handlePaymentFailure(
                 $booking,
-                'Payment was not successful'
+                $parsed['reason'] ?? 'Payment was not successful'
             );
         }
 
