@@ -17,6 +17,8 @@ class CleanupExpiredBookings extends Command
 
     public function handle(BookingService $bookingService, ToyyibPayService $toyyibPayService): int
     {
+        Log::info('bookings:cleanup-expired started');
+
         $expiredBookings = Booking::query()
             ->where('status', Booking::STATUS_PENDING_PAYMENT)
             ->whereNotNull('bill_code')
