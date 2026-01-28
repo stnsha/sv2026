@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'environment' => env('APP_ENV', 'production') === 'production' ? 'production' : 'dev',
+    'environment' => env('APP_ENV', 'production') === 'production' ? 'production' : 'local',
 
     'environments' => [
-        'dev' => [
+        'local' => [
             'base_url'      => 'https://dev.toyyibpay.com',
             'secret_key'    => env('DEV_TOYYIB_PAY_SECRET_KEY'),
             'category_code' => env('DEV_TOYYIB_PAY_CATEGORY_CODE'),

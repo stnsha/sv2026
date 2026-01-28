@@ -80,7 +80,14 @@ class PaymentController extends Controller
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
 
-        return redirect()->route('booking.show', $booking)
+        if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
+            $this->bookingService->handlePaymentFailure(
+                $booking,
+                'Payment was not successful'
+            );
+        }
+
+        return redirect()->route('booking.show', $booking->fresh())
             ->with('error', 'Payment was not successful. Please try again.');
     }
 }
