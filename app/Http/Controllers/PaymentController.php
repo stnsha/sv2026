@@ -80,11 +80,12 @@ class PaymentController extends Controller
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
 
+        $reason = $parsed['reason'] ?? 'Payment was not successful';
+
         if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
-            $this->bookingService->handlePaymentFailure(
-                $booking,
-                $parsed['reason'] ?? 'Payment was not successful'
-            );
+            $this->bookingService->handlePaymentFailure($booking, $reason);
+        } elseif ($booking->status === Booking::STATUS_PAYMENT_FAILED && $reason) {
+            $booking->update(['status_message' => $reason]);
         }
 
         return redirect()->route('booking.show', $booking->fresh())
