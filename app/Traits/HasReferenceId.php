@@ -7,26 +7,23 @@ use Carbon\Carbon;
 
 trait HasReferenceId
 {
-    private const REFERENCE_CHARACTERS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    private const REFERENCE_LETTERS = 'ABCDEFGHJKMNPQRSTUVWXYZ';
 
-    public static function generateUniqueReferenceId(int $dateId, int $timeSlotId, int $suffixLength = 3): string
+    public static function generateReferenceId(int $bookingId, int $dateId): string
     {
         $date = Date::findOrFail($dateId);
         $dateValue = $date->date_value instanceof Carbon
             ? $date->date_value
             : Carbon::parse($date->date_value);
 
-        $datePrefix = $dateValue->format('ymd');
-        $prefix = $datePrefix . $timeSlotId;
+        $letters = '';
+        for ($i = 0; $i < 2; $i++) {
+            $letters .= self::REFERENCE_LETTERS[random_int(0, strlen(self::REFERENCE_LETTERS) - 1)];
+        }
 
-        do {
-            $suffix = '';
-            for ($i = 0; $i < $suffixLength; $i++) {
-                $suffix .= self::REFERENCE_CHARACTERS[random_int(0, strlen(self::REFERENCE_CHARACTERS) - 1)];
-            }
-            $referenceId = $prefix . $suffix;
-        } while (static::where('reference_id', $referenceId)->exists());
+        $day = $dateValue->day;
+        $month = $dateValue->month;
 
-        return $referenceId;
+        return 'SV' . $bookingId . $letters . $day . $month;
     }
 }
