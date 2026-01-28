@@ -56,7 +56,7 @@ class BookingController extends Controller
 
             $billData = [
                 'billName' => 'Booking #' . $booking->reference_id,
-                'billDescription' => 'Restaurant table booking for ' . $booking->date->formatted_date,
+                'billDescription' => 'Sand Village booking for ' . $booking->date->formatted_date,
                 'billPriceSetting' => 1,
                 'billPayorInfo' => 1,
                 'billAmount' => (int) ($booking->total * 100),
@@ -70,7 +70,7 @@ class BookingController extends Controller
                 'billSplitPaymentArgs' => '',
                 'billPaymentChannel' => 0,
                 'billContentEmail' => 'Thank you for your booking. Your payment has been received.',
-                'billChargeToCustomer' => 1,
+                'billChargeToCustomer' => 0,
             ];
 
             $result = $this->toyyibPayService->createBill($billData);
