@@ -59,7 +59,7 @@ class BookingController extends Controller
                 'billDescription' => 'Sand Village booking for ' . $booking->date->formatted_date,
                 'billPriceSetting' => 1,
                 'billPayorInfo' => 1,
-                'billAmount' => (int) ($booking->total * 100),
+                'billAmount' => (int) round($booking->total * 100),
                 'billReturnUrl' => route('payment.redirect'),
                 'billCallbackUrl' => route('payment.callback'),
                 'billExternalReferenceNo' => $booking->reference_id,

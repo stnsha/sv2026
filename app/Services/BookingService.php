@@ -64,9 +64,8 @@ class BookingService
                 ];
             }
 
-            $serviceCharge = 1.00;
             $discount = 0;
-            $total = $subtotal + $serviceCharge - $discount;
+            $total = $subtotal - $discount;
 
             $booking = Booking::create([
                 'customer_id' => $customer->id,
@@ -74,7 +73,6 @@ class BookingService
                 'time_slot_id' => $timeSlotId,
                 'subtotal' => $subtotal,
                 'discount' => $discount,
-                'service_charge' => $serviceCharge,
                 'total' => $total,
                 'status' => Booking::STATUS_INITIATED,
             ]);

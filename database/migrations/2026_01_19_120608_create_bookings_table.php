@@ -17,7 +17,6 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('discount', 10, 2);
-            $table->decimal('service_charge', 10, 2); // e.g., 1.00
             $table->decimal('total', 10, 2);
             $table->string('bill_code');
             $table->unsignedTinyInteger('status')->default(0); // 0:initiated

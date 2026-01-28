@@ -416,7 +416,7 @@
                 },
 
                 get total() {
-                    return this.subtotal > 0 ? this.subtotal + 1 : 0;
+                    return this.subtotal;
                 },
 
                 get canSubmit() {

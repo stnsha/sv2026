@@ -30,7 +30,7 @@ class Booking extends Model
         'time_slot_id',
         'subtotal',
         'discount',
-        'service_charge',
+
         'total',
         'bill_code',
         'status',
@@ -42,7 +42,7 @@ class Booking extends Model
     protected $casts = [
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',
-        'service_charge' => 'decimal:2',
+
         'total' => 'decimal:2',
         'status' => 'integer',
         'transaction_time' => 'datetime',

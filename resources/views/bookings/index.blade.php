@@ -72,13 +72,9 @@
                         <span class="text-gray-600">Subtotal:</span>
                         <span id="subtotal">RM 0.00</span>
                     </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">Service Charge:</span>
-                        <span>RM 1.00</span>
-                    </div>
                     <div class="flex justify-between text-lg font-bold">
                         <span>Total:</span>
-                        <span id="total">RM 1.00</span>
+                        <span id="total">RM 0.00</span>
                     </div>
                 </div>
             </div>
@@ -155,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         totalPaxEl.textContent = totalPax;
         subtotalEl.textContent = 'RM ' + subtotal.toFixed(2);
-        totalEl.textContent = 'RM ' + (subtotal + 1).toFixed(2);
+        totalEl.textContent = 'RM ' + subtotal.toFixed(2);
 
         return totalPax;
     }

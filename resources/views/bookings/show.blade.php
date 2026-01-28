@@ -121,10 +121,6 @@
                                 <td colspan="3" class="py-2 text-right">Subtotal:</td>
                                 <td class="py-2 text-right">RM {{ number_format($booking->subtotal, 2) }}</td>
                             </tr>
-                            <tr class="border-b" style="border-color: rgba(91, 57, 36, 0.2);">
-                                <td colspan="3" class="py-2 text-right">Caj Perkhidmatan:</td>
-                                <td class="py-2 text-right">RM {{ number_format($booking->service_charge, 2) }}</td>
-                            </tr>
                             @if($booking->discount > 0)
                                 <tr class="border-b" style="border-color: rgba(91, 57, 36, 0.2);">
                                     <td colspan="3" class="py-2 text-right">Diskaun:</td>
