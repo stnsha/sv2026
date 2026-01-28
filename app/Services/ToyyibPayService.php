@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Booking;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -12,61 +11,130 @@ class ToyyibPayService
     private string $baseUrl;
     private string $secretKey;
     private string $categoryCode;
+    private string $environment;
 
     public function __construct()
     {
-        $this->baseUrl = config('services.toyyibpay.url');
-        $this->secretKey = config('services.toyyibpay.secret_key');
-        $this->categoryCode = config('services.toyyibpay.category_code');
+        $this->environment = config('toyyibpay.environment');
+        $env = config("toyyibpay.environments.{$this->environment}");
+
+        $this->baseUrl = $env['base_url'];
+        $this->secretKey = $env['secret_key'] ?? '';
+        $this->categoryCode = $env['category_code'] ?? '';
     }
 
-    public function createBill(Booking $booking): array
-    {
-        $customer = $booking->customer;
+    // -------------------------------------------------------------------------
+    // API Methods (ordered per toyyibPay API reference)
+    // -------------------------------------------------------------------------
 
-        $billData = [
+    public function createCategory(string $name, string $description): array
+    {
+        return $this->post('/index.php/api/createCategory', [
+            'catname' => $name,
+            'catdescription' => $description,
             'userSecretKey' => $this->secretKey,
-            'categoryCode' => $this->categoryCode,
-            'billName' => 'Table Booking #' . $booking->id,
-            'billDescription' => 'Restaurant table booking for ' . $booking->date->formatted_date,
-            'billPriceSetting' => 1,
-            'billPayorInfo' => 1,
-            'billAmount' => (int) ($booking->total * 100),
-            'billReturnUrl' => route('payment.redirect'),
-            'billCallbackUrl' => route('payment.callback'),
-            'billExternalReferenceNo' => 'BK' . str_pad($booking->id, 8, '0', STR_PAD_LEFT),
-            'billTo' => $customer->name,
-            'billEmail' => $customer->email,
-            'billPhone' => $customer->phone_number,
-            'billSplitPayment' => 0,
-            'billSplitPaymentArgs' => '',
-            'billPaymentChannel' => 0,
-            'billContentEmail' => 'Thank you for your booking. Your payment has been received.',
-            'billChargeToCustomer' => 1,
+        ]);
+    }
+
+    public function createBill(array $billData): array
+    {
+        $billData['userSecretKey'] = $this->secretKey;
+        $billData['categoryCode'] = $billData['categoryCode'] ?? $this->categoryCode;
+
+        return $this->post('/index.php/api/createBill', $billData);
+    }
+
+    public function getBillTransactions(string $billCode, ?int $paymentStatus = null): array
+    {
+        $data = [
+            'billCode' => $billCode,
         ];
 
+        if ($paymentStatus !== null) {
+            $data['billpaymentStatus'] = $paymentStatus;
+        }
+
+        return $this->post('/index.php/api/getBillTransactions', $data);
+    }
+
+    public function getCategoryDetails(?string $categoryCode = null): array
+    {
+        return $this->post('/index.php/api/getCategoryDetails', [
+            'categoryCode' => $categoryCode ?? $this->categoryCode,
+            'userSecretKey' => $this->secretKey,
+        ]);
+    }
+
+    public function inactiveBill(string $billCode): array
+    {
+        return $this->post('/index.php/api/inactiveBill', [
+            'billCode' => $billCode,
+            'userSecretKey' => $this->secretKey,
+        ]);
+    }
+
+    public function getBank(): array
+    {
+        return $this->get('/index.php/api/getBank');
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper Methods
+    // -------------------------------------------------------------------------
+
+    public function getPaymentUrl(string $billCode): string
+    {
+        return $this->baseUrl . '/' . $billCode;
+    }
+
+    public function parseCallback(array $data): array
+    {
+        return [
+            'bill_code' => $data['billcode'] ?? null,
+            'transaction_id' => $data['refno'] ?? null,
+            'status' => $data['status'] ?? null,
+            'reason' => $data['reason'] ?? null,
+            'is_paid' => ($data['status'] ?? null) === '1',
+        ];
+    }
+
+    public function parseRedirect(array $data): array
+    {
+        return [
+            'bill_code' => $data['billcode'] ?? null,
+            'status_id' => $data['status_id'] ?? null,
+            'is_paid' => ($data['status_id'] ?? null) === '1',
+        ];
+    }
+
+    public function getEnvironment(): string
+    {
+        return $this->environment;
+    }
+
+    public function isSandbox(): bool
+    {
+        return $this->environment !== 'production';
+    }
+
+    // -------------------------------------------------------------------------
+    // Private HTTP Helpers
+    // -------------------------------------------------------------------------
+
+    private function post(string $endpoint, array $data): array
+    {
         try {
-            $response = Http::asForm()->post($this->baseUrl . '/index.php/api/createBill', $billData);
+            $response = Http::asForm()->post($this->baseUrl . $endpoint, $data);
 
             if ($response->successful()) {
-                $result = $response->json();
-
-                if (is_array($result) && isset($result[0]['BillCode'])) {
-                    return [
-                        'success' => true,
-                        'bill_code' => $result[0]['BillCode'],
-                    ];
-                }
-
-                Log::error('ToyyibPay createBill unexpected response', ['response' => $result]);
-
                 return [
-                    'success' => false,
-                    'error' => 'Unexpected response from payment gateway',
+                    'success' => true,
+                    'data' => $response->json(),
                 ];
             }
 
-            Log::error('ToyyibPay createBill failed', [
+            Log::error('ToyyibPay API error', [
+                'endpoint' => $endpoint,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -76,7 +144,10 @@ class ToyyibPayService
                 'error' => 'Payment gateway request failed',
             ];
         } catch (Exception $e) {
-            Log::error('ToyyibPay createBill exception', ['message' => $e->getMessage()]);
+            Log::error('ToyyibPay API exception', [
+                'endpoint' => $endpoint,
+                'message' => $e->getMessage(),
+            ]);
 
             return [
                 'success' => false,
@@ -85,46 +156,38 @@ class ToyyibPayService
         }
     }
 
-    public function getPaymentUrl(string $billCode): string
+    private function get(string $endpoint): array
     {
-        return $this->baseUrl . '/' . $billCode;
-    }
+        try {
+            $response = Http::get($this->baseUrl . $endpoint);
 
-    public function handleCallback(array $callbackData): array
-    {
-        $billCode = $callbackData['billcode'] ?? null;
-        $transactionId = $callbackData['refno'] ?? null;
-        $status = $callbackData['status'] ?? null;
-        $reason = $callbackData['reason'] ?? null;
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json(),
+                ];
+            }
 
-        if (empty($billCode)) {
+            Log::error('ToyyibPay API error', [
+                'endpoint' => $endpoint,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
             return [
                 'success' => false,
-                'error' => 'Missing bill code',
+                'error' => 'Payment gateway request failed',
             ];
-        }
+        } catch (Exception $e) {
+            Log::error('ToyyibPay API exception', [
+                'endpoint' => $endpoint,
+                'message' => $e->getMessage(),
+            ]);
 
-        $booking = Booking::where('bill_code', $billCode)->first();
-
-        if (!$booking) {
             return [
                 'success' => false,
-                'error' => 'Booking not found',
+                'error' => 'Payment gateway connection failed',
             ];
         }
-
-        return [
-            'success' => true,
-            'booking' => $booking,
-            'transaction_id' => $transactionId,
-            'status' => $status,
-            'reason' => $reason,
-            'is_paid' => $status === '1',
-        ];
-    }
-
-    public function validateSignature(array $data): bool
-    {
-        return true;
     }
 }

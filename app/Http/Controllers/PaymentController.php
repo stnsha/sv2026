@@ -9,6 +9,7 @@ use DateTime;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -19,24 +20,32 @@ class PaymentController extends Controller
 
     public function callback(Request $request): Response
     {
-        $result = $this->toyyibPayService->handleCallback($request->all());
+        $parsed = $this->toyyibPayService->parseCallback($request->all());
 
-        if (!$result['success']) {
-            return response($result['error'], 400);
+        if (empty($parsed['bill_code'])) {
+            Log::warning('ToyyibPay callback missing bill code', $request->all());
+
+            return response('Missing bill code', 400);
         }
 
-        $booking = $result['booking'];
+        $booking = Booking::where('bill_code', $parsed['bill_code'])->first();
 
-        if ($result['is_paid']) {
+        if (!$booking) {
+            Log::warning('ToyyibPay callback booking not found', ['bill_code' => $parsed['bill_code']]);
+
+            return response('Booking not found', 404);
+        }
+
+        if ($parsed['is_paid']) {
             $this->bookingService->confirmBooking(
                 $booking,
-                $result['transaction_id'],
+                $parsed['transaction_id'],
                 new DateTime()
             );
         } else {
             $this->bookingService->handlePaymentFailure(
                 $booking,
-                $result['reason'] ?? 'Payment was not successful'
+                $parsed['reason'] ?? 'Payment was not successful'
             );
         }
 
@@ -45,17 +54,16 @@ class PaymentController extends Controller
 
     public function redirect(Request $request): RedirectResponse
     {
-        $billCode = $request->input('billcode');
-        $status = $request->input('status_id');
+        $parsed = $this->toyyibPayService->parseRedirect($request->all());
 
-        $booking = Booking::where('bill_code', $billCode)->first();
+        $booking = Booking::where('bill_code', $parsed['bill_code'])->first();
 
         if (!$booking) {
             return redirect()->route('booking.index')
                 ->with('error', 'Booking not found.');
         }
 
-        if ($status === '1') {
+        if ($parsed['is_paid']) {
             return redirect()->route('booking.show', $booking)
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
