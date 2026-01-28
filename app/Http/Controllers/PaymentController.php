@@ -64,7 +64,19 @@ class PaymentController extends Controller
         }
 
         if ($parsed['is_paid']) {
-            return redirect()->route('booking.show', $booking)
+            if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
+                $transactions = $this->toyyibPayService->getBillTransactions($parsed['bill_code'], 1);
+
+                if ($transactions['success'] && !empty($transactions['data'])) {
+                    $this->bookingService->confirmBooking(
+                        $booking,
+                        $transactions['data'][0]['billpaymentInvoiceNo'] ?? '',
+                        new DateTime()
+                    );
+                }
+            }
+
+            return redirect()->route('booking.show', $booking->fresh())
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
 
