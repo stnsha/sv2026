@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\BookingInvoice;
 use App\Models\Booking;
 use App\Models\BookingDetails;
 use App\Models\Customer;
@@ -9,6 +10,7 @@ use App\Models\Price;
 use App\Models\TableBooking;
 use DateTime;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class BookingService
@@ -119,6 +121,8 @@ class BookingService
             'transaction_time' => $transactionTime,
             'status_message' => 'Payment successful',
         ]);
+
+        Mail::to($booking->customer->email)->send(new BookingInvoice($booking));
 
         return $booking->fresh();
     }
