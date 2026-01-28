@@ -71,6 +71,8 @@ class BookingController extends Controller
                 'billPaymentChannel' => 0,
                 'billContentEmail' => 'Thank you for your booking. Your payment has been received.',
                 'billChargeToCustomer' => 0,
+                'billExpiryDate' => now('Asia/Kuala_Lumpur')->addMinutes(5)->format('d-m-Y H:i:s'),
+                'billExpiryDays' => 0,
             ];
 
             $result = $this->toyyibPayService->createBill($billData);
