@@ -68,11 +68,13 @@ class BookingController extends Controller
                 'billPhone' => $customer->phone_number,
                 'billSplitPayment' => 0,
                 'billSplitPaymentArgs' => '',
-                'billPaymentChannel' => 0,
                 'billContentEmail' => 'Thank you for your booking. Your payment has been received.',
-                'billChargeToCustomer' => 0,
                 'billExpiryDate' => now('Asia/Kuala_Lumpur')->addMinutes(5)->format('d-m-Y H:i:s'),
                 'billExpiryDays' => 0,
+                'billChargeToCustomer' => 0,
+                'billPaymentChannel' => 0,
+                'enableFPXB2B' => 1,
+                'chargeFPXB2B' => 0,
             ];
 
             $result = $this->toyyibPayService->createBill($billData);
