@@ -85,14 +85,7 @@ class PaymentController extends Controller
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
 
-        $reason = 'Payment was not successful';
-        $transactions = $this->toyyibPayService->getBillTransactions($parsed['bill_code']);
-
-        if ($transactions['success'] && !empty($transactions['data'])) {
-            $latest = $transactions['data'][0];
-            Log::info('ToyyibPay failed transaction data', $latest);
-            $reason = $latest['billpaymentStatusReason'] ?? $reason;
-        }
+        $reason = $parsed['reason'] ?? 'Payment was not successful';
 
         if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
             $this->bookingService->handlePaymentFailure($booking, $reason);
