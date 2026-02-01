@@ -84,28 +84,18 @@ class PaymentController extends Controller
                 ->with('error', 'Booking not found.');
         }
 
-        if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
-            if ($data['is_paid']) {
-                $this->bookingService->confirmBooking(
-                    $booking,
-                    $data['transaction_id'] ?? '',
-                    new DateTime()
-                );
-            } elseif ($data['is_pending']) {
-                $booking->update([
-                    'status_message' => 'Pending: ' . ($data['reason'] ?? 'Awaiting payment confirmation'),
-                ]);
-            } else {
-                $this->bookingService->handlePaymentFailure(
-                    $booking,
-                    'Failed: ' . ($data['reason'] ?? 'Unknown')
-                );
-            }
+        // Only handle success here - callback handles failures with correct reason
+        if ($data['is_paid'] && $booking->status === Booking::STATUS_PENDING_PAYMENT) {
+            $this->bookingService->confirmBooking(
+                $booking,
+                $data['transaction_id'] ?? '',
+                new DateTime()
+            );
         }
 
         $booking->refresh();
 
-        if ($data['is_paid']) {
+        if ($booking->status === Booking::STATUS_CONFIRMED) {
             return redirect()->route('booking.show', $booking)
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
