@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -44,5 +44,27 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function roles(): HasMany
+    {
+        return $this->hasMany(UserRole::class);
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('role', $role)->exists();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(UserRole::ROLE_SUPERADMIN);
+    }
+
+    public function assignRole(string $role): void
+    {
+        if (!$this->hasRole($role)) {
+            $this->roles()->create(['role' => $role]);
+        }
     }
 }

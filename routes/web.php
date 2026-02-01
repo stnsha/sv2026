@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CapacityController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
@@ -66,4 +67,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/capacity/{date}/{timeSlot}', [CapacityController::class, 'update'])->name('capacity.update');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+    Route::middleware('superadmin')->group(function () {
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings/users', [SettingsController::class, 'store'])->name('settings.users.store');
+    });
 });
