@@ -86,6 +86,7 @@ class PaymentController extends Controller
 
         // Update booking status if not already updated by callback
         // Matches buffet26: if ($order->status === 0)
+        // Note: Callback has detailed reason, redirect only has generic "ok"
         if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
             if ($data['is_paid']) {
                 $this->bookingService->confirmBooking(
@@ -95,13 +96,13 @@ class PaymentController extends Controller
                 );
             } elseif ($data['is_pending']) {
                 $booking->update([
-                    'status_message' => 'Pending: ' . ($data['reason'] ?? 'Awaiting payment confirmation'),
+                    'status_message' => 'Pending: Awaiting payment confirmation',
                 ]);
             } else {
                 // is_failed (status_id = 3)
                 $this->bookingService->handlePaymentFailure(
                     $booking,
-                    'Failed: ' . ($data['reason'] ?? 'Unknown')
+                    'Failed: Payment was cancelled or unsuccessful'
                 );
             }
         }
