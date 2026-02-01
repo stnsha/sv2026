@@ -20,31 +20,52 @@ class PaymentController extends Controller
 
     public function callback(Request $request): Response
     {
-        $parsed = $this->toyyibPayService->parseCallback($request->all());
+        $data = $this->toyyibPayService->parseCallback($request->all());
 
-        if (empty($parsed['bill_code'])) {
+        Log::info('ToyyibPay callback received', $data);
+
+        if (empty($data['bill_code'])) {
             Log::warning('ToyyibPay callback missing bill code', $request->all());
-
             return response('Missing bill code', 400);
         }
 
-        $booking = Booking::where('bill_code', $parsed['bill_code'])->first();
+        $booking = Booking::where('bill_code', $data['bill_code'])->first();
 
         if (!$booking) {
-            Log::warning('ToyyibPay callback booking not found', ['bill_code' => $parsed['bill_code']]);
-
+            Log::error('Booking not found for callback', ['bill_code' => $data['bill_code']]);
             return response('Booking not found', 404);
         }
 
-        if ($parsed['is_paid']) {
+        if ($data['is_paid']) {
             $this->bookingService->confirmBooking(
                 $booking,
-                $parsed['transaction_id'],
+                $data['transaction_id'],
                 new DateTime()
             );
+
+            Log::info('Payment successful', [
+                'booking_id' => $booking->id,
+                'transaction_id' => $data['transaction_id'],
+            ]);
+        } elseif ($data['is_pending']) {
+            $booking->update([
+                'status_message' => 'Pending: ' . ($data['reason'] ?? 'Awaiting payment confirmation'),
+            ]);
+
+            Log::info('Payment pending', [
+                'booking_id' => $booking->id,
+                'reason' => $data['reason'],
+            ]);
         } else {
-            $reason = $parsed['reason'] ?? 'Payment was not successful';
-            $this->bookingService->handlePaymentFailure($booking, $reason);
+            $this->bookingService->handlePaymentFailure(
+                $booking,
+                'Failed: ' . ($data['reason'] ?? 'Unknown')
+            );
+
+            Log::info('Payment failed', [
+                'booking_id' => $booking->id,
+                'reason' => $data['reason'],
+            ]);
         }
 
         return response('OK', 200);
@@ -52,41 +73,44 @@ class PaymentController extends Controller
 
     public function redirect(Request $request): RedirectResponse
     {
-        $parsed = $this->toyyibPayService->parseRedirect($request->all());
+        $data = $this->toyyibPayService->parseRedirect($request->all());
 
-        $booking = Booking::where('bill_code', $parsed['bill_code'])->first();
+        Log::info('ToyyibPay redirect received', $data);
+
+        $booking = Booking::where('bill_code', $data['bill_code'])->first();
 
         if (!$booking) {
             return redirect()->route('booking.index')
                 ->with('error', 'Booking not found.');
         }
 
-        if ($parsed['is_paid']) {
-            if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
-                $transactions = $this->toyyibPayService->getBillTransactions($parsed['bill_code'], 1);
-
-                if ($transactions['success'] && !empty($transactions['data'])) {
-                    $this->bookingService->confirmBooking(
-                        $booking,
-                        $transactions['data'][0]['billpaymentInvoiceNo'] ?? '',
-                        new DateTime()
-                    );
-                }
+        if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
+            if ($data['is_paid']) {
+                $this->bookingService->confirmBooking(
+                    $booking,
+                    $data['transaction_id'] ?? '',
+                    new DateTime()
+                );
+            } elseif ($data['is_pending']) {
+                $booking->update([
+                    'status_message' => 'Pending: ' . ($data['reason'] ?? 'Awaiting payment confirmation'),
+                ]);
+            } else {
+                $this->bookingService->handlePaymentFailure(
+                    $booking,
+                    'Failed: ' . ($data['reason'] ?? 'Unknown')
+                );
             }
+        }
 
-            return redirect()->route('booking.show', $booking->fresh())
+        $booking->refresh();
+
+        if ($data['is_paid']) {
+            return redirect()->route('booking.show', $booking)
                 ->with('success', 'Payment successful! Your booking is confirmed.');
         }
 
-        $reason = $parsed['reason'] ?? 'Payment was not successful';
-
-        if ($booking->status === Booking::STATUS_PENDING_PAYMENT) {
-            $this->bookingService->handlePaymentFailure($booking, $reason);
-        } elseif ($booking->status === Booking::STATUS_PAYMENT_FAILED) {
-            $booking->update(['status_message' => $reason]);
-        }
-
-        return redirect()->route('booking.show', $booking->fresh())
+        return redirect()->route('booking.show', $booking)
             ->with('error', 'Payment was not successful. Please try again.');
     }
 }
