@@ -89,23 +89,33 @@ class ToyyibPayService
 
     public function parseCallback(array $data): array
     {
+        $status = $data['status'] ?? null;
+
         return [
             'bill_code' => $data['billcode'] ?? null,
             'transaction_id' => $data['refno'] ?? null,
-            'status' => $data['status'] ?? null,
+            'status' => $status,
             'reason' => $data['reason'] ?? null,
-            'is_paid' => ($data['status'] ?? null) === '1',
+            'amount' => $data['amount'] ?? null,
+            'transaction_time' => $data['transaction_time'] ?? null,
+            'is_paid' => $status === '1',
+            'is_pending' => $status === '2',
+            'is_failed' => $status === '3',
         ];
     }
 
     public function parseRedirect(array $data): array
     {
+        $statusId = $data['status_id'] ?? null;
+
         return [
             'bill_code' => $data['billcode'] ?? null,
-            'status_id' => $data['status_id'] ?? null,
+            'status_id' => $statusId,
             'reason' => $data['msg'] ?? null,
             'transaction_id' => $data['transaction_id'] ?? null,
-            'is_paid' => ($data['status_id'] ?? null) === '1',
+            'is_paid' => $statusId === '1',
+            'is_pending' => $statusId === '2',
+            'is_failed' => $statusId === '3',
         ];
     }
 
