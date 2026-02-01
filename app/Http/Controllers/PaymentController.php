@@ -43,14 +43,7 @@ class PaymentController extends Controller
                 new DateTime()
             );
         } else {
-            $reason = 'Payment was not successful';
-            $transactions = $this->toyyibPayService->getBillTransactions($parsed['bill_code']);
-
-            if ($transactions['success'] && !empty($transactions['data'])) {
-                $latest = $transactions['data'][0];
-                $reason = $latest['billpaymentStatusReason'] ?? $reason;
-            }
-
+            $reason = $parsed['reason'] ?? 'Payment was not successful';
             $this->bookingService->handlePaymentFailure($booking, $reason);
         }
 
