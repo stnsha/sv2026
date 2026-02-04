@@ -314,24 +314,6 @@
                             this.currentSlide = Math.max(0, this.totalSlides - 1);
                         }
                     });
-
-                    // Select first available date
-                    for (const dateId of dateIds) {
-                        if (!this.isDateSoldOut(dateId)) {
-                            this.selectedDate = String(dateId);
-                            break;
-                        }
-                    }
-
-                    // Select first available time slot for the selected date
-                    if (this.selectedDate) {
-                        for (const slotId of timeSlotIds) {
-                            if (this.isSlotAvailable(slotId)) {
-                                this.selectedTimeSlot = String(slotId);
-                                break;
-                            }
-                        }
-                    }
                 },
 
                 isDateSoldOut(dateId) {
