@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\CapacityService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CheckAvailabilityRequest extends FormRequest
@@ -31,5 +32,29 @@ class CheckAvailabilityRequest extends FormRequest
             'total_pax.min' => 'At least 1 guest is required.',
             'total_pax.max' => 'Maximum capacity is 192 guests.',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($validator->errors()->any()) {
+                return;
+            }
+
+            $capacityService = app(CapacityService::class);
+            $minimumPax = $capacityService->getEffectiveMinimumPax(
+                (int) $this->input('date_id'),
+                (int) $this->input('time_slot_id')
+            );
+
+            $totalPax = (int) $this->input('total_pax');
+
+            if ($totalPax < $minimumPax) {
+                $validator->errors()->add(
+                    'total_pax',
+                    "Minimum booking size for this time slot is {$minimumPax} guests."
+                );
+            }
+        });
     }
 }

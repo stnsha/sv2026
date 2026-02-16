@@ -10,11 +10,13 @@ class TimeSlot extends Model
     protected $fillable = [
         'start_time',
         'end_time',
+        'minimum_pax',
     ];
 
     protected $casts = [
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
+        'minimum_pax' => 'integer',
     ];
 
     public function bookings(): HasMany
@@ -25,6 +27,11 @@ class TimeSlot extends Model
     public function tableBookings(): HasMany
     {
         return $this->hasMany(TableBooking::class);
+    }
+
+    public function minimumPaxOverrides(): HasMany
+    {
+        return $this->hasMany(MinimumPaxOverride::class);
     }
 
     public function getFormattedTimeAttribute(): string

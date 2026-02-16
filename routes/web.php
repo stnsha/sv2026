@@ -12,15 +12,17 @@ use App\Http\Controllers\PaymentController;
 use App\Models\Date;
 use App\Models\Price;
 use App\Models\TimeSlot;
+use App\Services\CapacityService;
 use App\Services\TableAssignmentService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (TableAssignmentService $tableAssignmentService) {
+Route::get('/', function (TableAssignmentService $tableAssignmentService, CapacityService $capacityService) {
     $dates = Date::orderBy('date_value')->get();
     $timeSlots = TimeSlot::all();
     $prices = Price::all();
 
     $slotAvailability = [];
+    $slotMinimumPax = [];
     $soldOutDates = [];
 
     foreach ($dates as $date) {
@@ -29,6 +31,7 @@ Route::get('/', function (TableAssignmentService $tableAssignmentService) {
             $availableTables = $tableAssignmentService->getAvailableTables($date->id, $timeSlot->id);
             $availablePax = $availableTables->sum('capacity');
             $slotAvailability[$date->id][$timeSlot->id] = $availablePax;
+            $slotMinimumPax[$date->id][$timeSlot->id] = $capacityService->getEffectiveMinimumPax($date->id, $timeSlot->id);
             if ($availablePax > 0) {
                 $allSlotsSoldOut = false;
             }
@@ -38,7 +41,7 @@ Route::get('/', function (TableAssignmentService $tableAssignmentService) {
         }
     }
 
-    return view('welcome', compact('dates', 'timeSlots', 'prices', 'slotAvailability', 'soldOutDates'));
+    return view('welcome', compact('dates', 'timeSlots', 'prices', 'slotAvailability', 'slotMinimumPax', 'soldOutDates'));
 });
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');

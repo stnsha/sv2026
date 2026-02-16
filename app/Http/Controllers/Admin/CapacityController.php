@@ -68,6 +68,8 @@ class CapacityController extends Controller
         $blockedTableIds = $this->capacityService->getBlockedTableIds($date->id, $timeSlot->id);
         $bookedTableIds = $this->capacityService->getBookedTableIds($date->id, $timeSlot->id);
         $capacityOverrides = $this->capacityService->getCapacityOverrides($date->id, $timeSlot->id);
+        $effectiveMinimumPax = $this->capacityService->getEffectiveMinimumPax($date->id, $timeSlot->id);
+        $defaultMinimumPax = $timeSlot->minimum_pax;
 
         return view('admin.capacity.edit', [
             'date' => $date,
@@ -76,6 +78,8 @@ class CapacityController extends Controller
             'blockedTableIds' => $blockedTableIds,
             'bookedTableIds' => $bookedTableIds,
             'capacityOverrides' => $capacityOverrides,
+            'effectiveMinimumPax' => $effectiveMinimumPax,
+            'defaultMinimumPax' => $defaultMinimumPax,
         ]);
     }
 
@@ -86,6 +90,7 @@ class CapacityController extends Controller
             'blocked_tables.*' => 'exists:tables,id',
             'capacity_overrides' => 'nullable|array',
             'capacity_overrides.*' => 'nullable|integer|min:2',
+            'allow_two_pax' => 'required|boolean',
         ]);
 
         $blockedTableIds = $validated['blocked_tables'] ?? [];
@@ -93,6 +98,13 @@ class CapacityController extends Controller
 
         $capacityOverrides = $validated['capacity_overrides'] ?? [];
         $this->capacityService->syncCapacityOverridesForSlot($date->id, $timeSlot->id, $capacityOverrides);
+
+        $allowTwoPax = (bool) $validated['allow_two_pax'];
+        $this->capacityService->syncMinimumPaxOverride(
+            $date->id,
+            $timeSlot->id,
+            $allowTwoPax ? 2 : null
+        );
 
         return redirect()
             ->route('admin.capacity.index')

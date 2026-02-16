@@ -16,7 +16,8 @@ use RuntimeException;
 class BookingService
 {
     public function __construct(
-        private TableAssignmentService $tableAssignmentService
+        private TableAssignmentService $tableAssignmentService,
+        private CapacityService $capacityService,
     ) {}
 
     public function createBooking(array $customerData, int $dateId, int $timeSlotId, array $paxDetails): Booking
@@ -159,6 +160,7 @@ class BookingService
     {
         $tableResult = $this->tableAssignmentService->findOptimalTables($totalPax, $dateId, $timeSlotId);
         $summary = $this->tableAssignmentService->getAvailabilitySummary($dateId, $timeSlotId);
+        $minimumPax = $this->capacityService->getEffectiveMinimumPax($dateId, $timeSlotId);
 
         return [
             'available' => $tableResult !== null,
@@ -168,6 +170,7 @@ class BookingService
                 'total_capacity' => $tableResult['total_capacity'],
             ] : null,
             'summary' => $summary,
+            'minimum_pax' => $minimumPax,
         ];
     }
 }

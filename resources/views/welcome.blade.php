@@ -176,7 +176,11 @@
 
                 {{-- Guest Quantities --}}
                 <fieldset class="mb-6 space-y-3">
-                    <legend class="text-[14px] font-medium text-[#5B3924] tracking-[0.05em] mb-3">Bilangan Tetamu</legend>
+                    <legend class="text-[14px] font-medium text-[#5B3924] tracking-[0.05em] mb-1">Bilangan Tetamu</legend>
+                    <p x-show="selectedDate && selectedTimeSlot" x-cloak
+                       class="text-[12px] text-[#5B3924] mb-2"
+                       x-text="'Minimum ' + currentMinimumPax + ' orang tetamu diperlukan'">
+                    </p>
 
                     @foreach($prices as $index => $price)
                     <div class="flex items-center justify-between rounded-lg p-3 shadow-md" style="background-color: #FFFFFF;">
@@ -295,6 +299,7 @@
                     pax: ''
                 },
                 slotAvailability: @json($slotAvailability),
+                slotMinimumPax: @json($slotMinimumPax),
                 soldOutDates: @json($soldOutDates),
                 dateLabels: {
                     @foreach($dates as $date)
@@ -332,6 +337,15 @@
                         return 0;
                     }
                     return this.slotAvailability[this.selectedDate][slotId] || 0;
+                },
+
+                get currentMinimumPax() {
+                    if (this.selectedDate && this.selectedTimeSlot
+                        && this.slotMinimumPax[this.selectedDate]
+                        && this.slotMinimumPax[this.selectedDate][this.selectedTimeSlot]) {
+                        return this.slotMinimumPax[this.selectedDate][this.selectedTimeSlot];
+                    }
+                    return 3;
                 },
 
                 onDateChange(dateId) {
@@ -452,8 +466,8 @@
                     this.validateField('name');
                     this.validateField('phone');
                     this.validateField('email');
-                    if (this.totalPax < 1) {
-                        this.errors.pax = 'Sila pilih sekurang-kurangnya 1 tetamu';
+                    if (this.totalPax < this.currentMinimumPax) {
+                        this.errors.pax = 'Minimum tempahan ialah ' + this.currentMinimumPax + ' orang tetamu.';
                     } else {
                         this.errors.pax = '';
                     }
@@ -491,6 +505,13 @@
                         return;
                     }
 
+                    // Check minimum pax requirement
+                    if (this.totalPax < this.currentMinimumPax) {
+                        this.isAvailable = false;
+                        this.availabilityMessage = 'Minimum tempahan ialah ' + this.currentMinimumPax + ' orang tetamu.';
+                        return;
+                    }
+
                     try {
                         const response = await fetch('{{ route('booking.check-availability') }}', {
                             method: 'POST',
@@ -525,7 +546,7 @@
                 },
 
                 handleSubmit(e) {
-                    if (!this.validateAllFields() || !this.isAvailable || this.totalPax < 1) {
+                    if (!this.validateAllFields() || !this.isAvailable || this.totalPax < this.currentMinimumPax) {
                         e.preventDefault();
                         return;
                     }

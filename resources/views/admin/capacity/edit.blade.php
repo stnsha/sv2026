@@ -31,6 +31,25 @@
         @method('PUT')
 
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-grey-900">Minimum Pax</h2>
+                    <p class="text-sm text-grey-500 mt-1">
+                        Default minimum is {{ $defaultMinimumPax }} pax per booking. Enable the toggle below to allow 2 pax bookings for this date and time slot.
+                    </p>
+                </div>
+            </div>
+
+            <label class="inline-flex items-center gap-3 cursor-pointer">
+                <input type="hidden" name="allow_two_pax" value="0">
+                <input type="checkbox" name="allow_two_pax" value="1"
+                    class="w-5 h-5 rounded border-grey-300 text-primary-600 focus:ring-primary-500"
+                    {{ $effectiveMinimumPax < $defaultMinimumPax ? 'checked' : '' }}>
+                <span class="text-sm font-medium text-grey-700">Allow 2 pax bookings</span>
+            </label>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-grey-900">Table Management</h2>

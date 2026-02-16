@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BlockedTable;
 use App\Models\Booking;
 use App\Models\Date;
+use App\Models\MinimumPaxOverride;
 use App\Models\Table;
 use App\Models\TableBooking;
 use App\Models\TableCapacityOverride;
@@ -137,6 +138,44 @@ class CapacityService
             ->where('time_slot_id', $timeSlotId)
             ->pluck('effective_capacity', 'table_id')
             ->toArray();
+    }
+
+    public function getEffectiveMinimumPax(int $dateId, int $timeSlotId): int
+    {
+        $override = MinimumPaxOverride::query()
+            ->where('date_id', $dateId)
+            ->where('time_slot_id', $timeSlotId)
+            ->first();
+
+        if ($override !== null) {
+            return $override->minimum_pax;
+        }
+
+        $timeSlot = TimeSlot::find($timeSlotId);
+
+        return $timeSlot?->minimum_pax ?? 3;
+    }
+
+    public function syncMinimumPaxOverride(int $dateId, int $timeSlotId, ?int $minimumPax): void
+    {
+        if ($minimumPax === null) {
+            MinimumPaxOverride::query()
+                ->where('date_id', $dateId)
+                ->where('time_slot_id', $timeSlotId)
+                ->delete();
+
+            return;
+        }
+
+        MinimumPaxOverride::updateOrCreate(
+            [
+                'date_id' => $dateId,
+                'time_slot_id' => $timeSlotId,
+            ],
+            [
+                'minimum_pax' => $minimumPax,
+            ]
+        );
     }
 
     public function syncCapacityOverridesForSlot(int $dateId, int $timeSlotId, array $overrides): void

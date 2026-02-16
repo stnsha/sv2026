@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\CapacityService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBookingRequest extends FormRequest
@@ -44,11 +45,24 @@ class StoreBookingRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            if ($validator->errors()->any()) {
+                return;
+            }
+
             $paxDetails = $this->input('pax_details', []);
             $totalPax = collect($paxDetails)->sum('quantity');
 
-            if ($totalPax < 1) {
-                $validator->errors()->add('pax_details', 'At least 1 guest is required.');
+            $capacityService = app(CapacityService::class);
+            $minimumPax = $capacityService->getEffectiveMinimumPax(
+                (int) $this->input('date_id'),
+                (int) $this->input('time_slot_id')
+            );
+
+            if ($totalPax < $minimumPax) {
+                $validator->errors()->add(
+                    'pax_details',
+                    "Minimum booking size for this time slot is {$minimumPax} guests."
+                );
             }
 
             if ($totalPax > 192) {
