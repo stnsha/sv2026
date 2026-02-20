@@ -11,10 +11,12 @@ class Price extends Model
         'category',
         'amount',
         'description',
+        'extra_chair',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'extra_chair' => 'boolean',
     ];
 
     public function bookingDetails(): HasMany

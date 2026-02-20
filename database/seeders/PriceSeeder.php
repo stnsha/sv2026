@@ -9,32 +9,24 @@ class PriceSeeder extends Seeder
 {
     public function run(): void
     {
-        $prices = [
-            [
-                'category' => 'Dewasa',
-                'amount' => 55.90,
-                'description' => 'Adult pricing',
-            ],
-            [
-                'category' => 'Warga Emas',
-                'amount' => 48.90,
-                'description' => 'Senior citizen pricing',
-            ],
-            [
-                'category' => 'Kanak-kanak',
-                'amount' => 39.90,
-                'description' => 'Children pricing',
-            ],
-        ];
+        Price::firstOrCreate(
+            ['category' => 'Dewasa'],
+            ['amount' => 55.90, 'description' => 'Adult pricing', 'extra_chair' => false]
+        );
 
-        foreach ($prices as $price) {
-            Price::firstOrCreate(
-                ['category' => $price['category']],
-                [
-                    'amount' => $price['amount'],
-                    'description' => $price['description'],
-                ]
-            );
-        }
+        Price::firstOrCreate(
+            ['category' => 'Warga Emas'],
+            ['amount' => 48.90, 'description' => 'Senior citizen pricing', 'extra_chair' => false]
+        );
+
+        Price::updateOrCreate(
+            ['category' => 'Kanak-kanak', 'description' => '5 tahun dan ke atas'],
+            ['amount' => 39.90, 'extra_chair' => false]
+        );
+
+        Price::firstOrCreate(
+            ['category' => 'Kanak-kanak', 'description' => '4 tahun dan ke bawah'],
+            ['amount' => 10.00, 'extra_chair' => true]
+        );
     }
 }

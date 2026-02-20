@@ -18,7 +18,7 @@ Telefon: {{ $booking->customer->phone_number }}
 BUTIRAN TETAMU
 --------------
 @foreach($booking->details as $detail)
-{{ $detail->price->category }}  x{{ $detail->quantity }}  RM {{ number_format($detail->price->amount, 2) }}  = RM {{ number_format($detail->total, 2) }}
+{{ $detail->price->category }}{{ $detail->price->description ? ' (' . $detail->price->description . ')' : '' }}  x{{ $detail->quantity }}  RM {{ number_format($detail->price->amount, 2) }}  = RM {{ number_format($detail->total, 2) }}
 @endforeach
 
 Subtotal: RM {{ number_format($booking->subtotal, 2) }}

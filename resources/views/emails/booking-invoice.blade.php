@@ -103,7 +103,7 @@
                                             <!-- Table Body -->
                                             @foreach($booking->details as $detail)
                                                 <tr>
-                                                    <td style="padding: 8px 0; font-size: 13px; border-bottom: 1px solid rgba(91, 57, 36, 0.2);">{{ $detail->price->category }}</td>
+                                                    <td style="padding: 8px 0; font-size: 13px; border-bottom: 1px solid rgba(91, 57, 36, 0.2);">{{ $detail->price->category }}{{ $detail->price->description ? ' (' . $detail->price->description . ')' : '' }}</td>
                                                     <td align="center" style="padding: 8px 0; font-size: 13px; border-bottom: 1px solid rgba(91, 57, 36, 0.2);">{{ $detail->quantity }}</td>
                                                     <td align="right" style="padding: 8px 0; font-size: 13px; border-bottom: 1px solid rgba(91, 57, 36, 0.2);">RM {{ number_format($detail->price->amount, 2) }}</td>
                                                     <td align="right" style="padding: 8px 0; font-size: 13px; border-bottom: 1px solid rgba(91, 57, 36, 0.2);">RM {{ number_format($detail->total, 2) }}</td>

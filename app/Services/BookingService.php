@@ -25,7 +25,15 @@ class BookingService
         return DB::transaction(function () use ($customerData, $dateId, $timeSlotId, $paxDetails) {
             $totalPax = collect($paxDetails)->sum('quantity');
 
-            $tableResult = $this->tableAssignmentService->findOptimalTables($totalPax, $dateId, $timeSlotId);
+            $extraChairPriceIds = Price::whereIn('id', collect($paxDetails)->pluck('price_id'))
+                ->where('extra_chair', true)
+                ->pluck('id');
+
+            $tablePax = collect($paxDetails)
+                ->reject(fn($d) => $extraChairPriceIds->contains($d['price_id']))
+                ->sum('quantity');
+
+            $tableResult = $this->tableAssignmentService->findOptimalTables($tablePax, $dateId, $timeSlotId);
 
             if ($tableResult === null) {
                 throw new RuntimeException('Not enough tables available for the requested party size.');

@@ -62,6 +62,9 @@
                                 @endif
                             </div>
                             <p class="text-[12px] md:text-[14px] font-medium text-[#5B3924] tracking-[0.05em]">{{ $price->category }}</p>
+                            @if($price->category === 'Kanak-kanak' && $price->description)
+                                <p class="text-[10px] md:text-[11px] text-[#5B3924] mt-0.5 opacity-70">({{ $price->description }})</p>
+                            @endif
                             <div class="flex items-start justify-center gap-0.5 mt-1">
                                 <span class="text-[10px] md:text-[12px] text-[#5B3924]">RM</span>
                                 <span class="text-2xl md:text-4xl font-bold text-[#5B3924]">{{ number_format($price->amount, 2) }}</span>
@@ -184,7 +187,7 @@
 
                     @foreach($prices as $index => $price)
                     <div class="flex items-center justify-between rounded-lg p-3 shadow-md" style="background-color: #FFFFFF;">
-                        <span class="text-[14px] font-medium text-[#5B3924]">{{ $price->category }}</span>
+                        <span class="text-[14px] font-medium text-[#5B3924]">{{ $price->category }}{{ $price->category === 'Kanak-kanak' && $price->description ? ' (' . $price->description . ')' : '' }}</span>
                         <div class="flex items-center gap-3">
                             <input type="hidden" name="pax_details[{{ $index }}][price_id]" value="{{ $price->id }}">
                             <div class="flex items-center">
@@ -285,6 +288,7 @@
                 selectedTimeSlot: '',
                 quantities: prices.map(() => 0),
                 prices: prices.map(p => parseFloat(p.amount)),
+                extraChairFlags: prices.map(p => !!p.extra_chair),
                 availabilityMessage: '',
                 isAvailable: false,
                 currentSlide: 0,
@@ -407,6 +411,10 @@
                     return this.quantities.reduce((sum, qty) => sum + qty, 0);
                 },
 
+                get tablePax() {
+                    return this.quantities.reduce((sum, qty, i) => sum + (this.extraChairFlags[i] ? 0 : qty), 0);
+                },
+
                 get subtotal() {
                     return this.quantities.reduce((sum, qty, i) => sum + (qty * this.prices[i]), 0);
                 },
@@ -522,7 +530,7 @@
                             body: JSON.stringify({
                                 date_id: this.selectedDate,
                                 time_slot_id: this.selectedTimeSlot,
-                                total_pax: this.totalPax
+                                total_pax: this.tablePax
                             })
                         });
 

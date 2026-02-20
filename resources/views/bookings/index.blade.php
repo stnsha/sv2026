@@ -53,12 +53,13 @@
                 @foreach($prices as $index => $price)
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ $price->category }} (RM {{ number_format($price->amount, 2) }})
+                            {{ $price->category }}{{ $price->description ? ' (' . $price->description . ')' : '' }} (RM {{ number_format($price->amount, 2) }})
                         </label>
                         <input type="hidden" name="pax_details[{{ $index }}][price_id]" value="{{ $price->id }}">
                         <input type="number" name="pax_details[{{ $index }}][quantity]" id="pax_{{ $price->id }}"
                                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 pax-input"
                                data-price="{{ $price->amount }}"
+                               data-extra-chair="{{ $price->extra_chair ? '1' : '0' }}"
                                value="{{ old('pax_details.' . $index . '.quantity', 0) }}" min="0">
                     </div>
                 @endforeach
@@ -161,6 +162,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const timeSlotId = timeSlotSelect.value;
         const totalPax = calculateTotals();
 
+        let tablePax = 0;
+        paxInputs.forEach(input => {
+            const qty = parseInt(input.value) || 0;
+            if (input.dataset.extraChair !== '1') {
+                tablePax += qty;
+            }
+        });
+
         if (!dateId || !timeSlotId || totalPax < 1) {
             availabilityStatus.classList.add('hidden');
             submitBtn.disabled = true;
@@ -176,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 date_id: dateId,
                 time_slot_id: timeSlotId,
-                total_pax: totalPax
+                total_pax: tablePax
             })
         })
         .then(response => response.json())

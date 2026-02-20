@@ -109,7 +109,7 @@
                         <tbody>
                             @foreach($booking->details as $detail)
                                 <tr class="border-b" style="border-color: rgba(91, 57, 36, 0.2);">
-                                    <td class="py-2">{{ $detail->price->category }}</td>
+                                    <td class="py-2">{{ $detail->price->category }}{{ $detail->price->description ? ' (' . $detail->price->description . ')' : '' }}</td>
                                     <td class="text-center py-2">{{ $detail->quantity }}</td>
                                     <td class="text-right py-2">RM {{ number_format($detail->price->amount, 2) }}</td>
                                     <td class="text-right py-2">RM {{ number_format($detail->total, 2) }}</td>
