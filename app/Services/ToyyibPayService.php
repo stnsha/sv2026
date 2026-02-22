@@ -47,14 +47,25 @@ class ToyyibPayService
     public function getBillTransactions(string $billCode, ?int $paymentStatus = null): array
     {
         $data = [
-            'billCode' => $billCode,
+            'userSecretKey' => $this->secretKey,
+            'billCode'      => $billCode,
         ];
 
         if ($paymentStatus !== null) {
             $data['billpaymentStatus'] = $paymentStatus;
         }
 
-        return $this->post('/index.php/api/getBillTransactions', $data);
+        $result = $this->post('/index.php/api/getBillTransactions', $data);
+
+        // ToyyibPay returns a direct JSON array. When there are no transactions
+        // matching the filter it returns null or an empty body, causing json()
+        // to resolve to null. Normalise to an empty array so callers can safely
+        // use is_array() / count() without extra null checks.
+        if ($result['success'] && !is_array($result['data'])) {
+            $result['data'] = [];
+        }
+
+        return $result;
     }
 
     public function getCategoryDetails(?string $categoryCode = null): array
@@ -94,14 +105,29 @@ class ToyyibPayService
         return [
             'bill_code' => $data['billcode'] ?? null,
             'transaction_id' => $data['refno'] ?? null,
+            'order_id' => $data['order_id'] ?? null,
             'status' => $status,
             'reason' => $data['reason'] ?? null,
             'amount' => $data['amount'] ?? null,
             'transaction_time' => $data['transaction_time'] ?? null,
+            'hash' => $data['hash'] ?? null,
             'is_paid' => $status === '1',
             'is_pending' => $status === '2',
             'is_failed' => $status === '3',
         ];
+    }
+
+    public function verifyCallbackHash(array $data): bool
+    {
+        $expected = md5(
+            $this->secretKey .
+            ($data['status'] ?? '') .
+            ($data['order_id'] ?? '') .
+            ($data['refno'] ?? '') .
+            'ok'
+        );
+
+        return hash_equals($expected, $data['hash'] ?? '');
     }
 
     public function parseRedirect(array $data): array
@@ -111,8 +137,7 @@ class ToyyibPayService
         return [
             'bill_code' => $data['billcode'] ?? null,
             'status_id' => $statusId,
-            'reason' => $data['msg'] ?? null,
-            'transaction_id' => $data['transaction_id'] ?? null,
+            'order_id' => $data['order_id'] ?? null,
             'is_paid' => $statusId === '1',
             'is_pending' => $statusId === '2',
             'is_failed' => $statusId === '3',

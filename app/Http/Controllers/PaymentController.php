@@ -20,6 +20,11 @@ class PaymentController extends Controller
 
     public function callback(Request $request): Response
     {
+        if (!$this->toyyibPayService->verifyCallbackHash($request->all())) {
+            Log::warning('ToyyibPay callback hash mismatch', $request->all());
+            return response('Invalid hash', 400);
+        }
+
         $data = $this->toyyibPayService->parseCallback($request->all());
 
         Log::info('ToyyibPay callback received', $data);
@@ -91,7 +96,7 @@ class PaymentController extends Controller
             if ($data['is_paid']) {
                 $this->bookingService->confirmBooking(
                     $booking,
-                    $data['transaction_id'] ?? '',
+                    $data['order_id'] ?? '',
                     new DateTime()
                 );
             } elseif ($data['is_pending']) {

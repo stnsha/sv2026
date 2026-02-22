@@ -63,7 +63,7 @@ class CleanupExpiredBookings extends Command
         $expiredBookings = Booking::query()
             ->where('status', Booking::STATUS_PENDING_PAYMENT)
             ->whereNotNull('bill_code')
-            ->where('updated_at', '<', now()->subMinutes(5))
+            ->where('updated_at', '<', now()->subMinutes(10))
             ->get();
 
         if ($expiredBookings->isEmpty()) {
@@ -88,18 +88,51 @@ class CleanupExpiredBookings extends Command
     ): void {
         $transactions = $toyyibPayService->getBillTransactions($booking->bill_code, 1);
 
-        if ($transactions['success'] && !empty($transactions['data'])) {
+        if (!$transactions['success']) {
+            Log::warning('getBillTransactions failed, skipping booking expiry', [
+                'booking_id' => $booking->id,
+                'bill_code' => $booking->bill_code,
+                'error' => $transactions['error'] ?? 'unknown',
+            ]);
+            $this->info("Booking {$booking->reference_id} skipped — API unavailable, will retry next run.");
+
+            return;
+        }
+
+        Log::debug('CleanupExpiredBookings: getBillTransactions raw response', [
+            'booking_id' => $booking->id,
+            'bill_code'  => $booking->bill_code,
+            'response'   => $transactions,
+        ]);
+
+        $data = $transactions['data'];
+
+        // ToyyibPay returns a JSON array for this endpoint.
+        // A non-list (e.g. an error object {"msg":"..."}) or null means the
+        // response is not a valid transaction list — skip rather than expire.
+        if (!is_array($data) || !array_is_list($data)) {
+            Log::warning('getBillTransactions returned unexpected format, skipping booking expiry', [
+                'booking_id' => $booking->id,
+                'bill_code' => $booking->bill_code,
+                'data' => $data,
+            ]);
+            $this->info("Booking {$booking->reference_id} skipped — unexpected API response, will retry next run.");
+
+            return;
+        }
+
+        if (!empty($data)) {
             Log::info('Expired booking was actually paid, confirming', [
                 'booking_id' => $booking->id,
                 'reference_id' => $booking->reference_id,
                 'bill_code' => $booking->bill_code,
-                'invoice_no' => $transactions['data'][0]['billpaymentInvoiceNo'] ?? '',
+                'invoice_no' => $data[0]['billpaymentInvoiceNo'] ?? '',
             ]);
             $this->info("Booking {$booking->reference_id} was actually paid. Confirming.");
 
             $bookingService->confirmBooking(
                 $booking,
-                $transactions['data'][0]['billpaymentInvoiceNo'] ?? '',
+                $data[0]['billpaymentInvoiceNo'] ?? '',
                 new DateTime(),
             );
 
