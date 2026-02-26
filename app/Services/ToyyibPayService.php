@@ -135,12 +135,13 @@ class ToyyibPayService
         $statusId = $data['status_id'] ?? null;
 
         return [
-            'bill_code' => $data['billcode'] ?? null,
-            'status_id' => $statusId,
-            'order_id' => $data['order_id'] ?? null,
-            'is_paid' => $statusId === '1',
-            'is_pending' => $statusId === '2',
-            'is_failed' => $statusId === '3',
+            'bill_code'      => $data['billcode'] ?? null,
+            'status_id'      => $statusId,
+            'reason'         => $data['msg'] ?? null,
+            'transaction_id' => $data['transaction_id'] ?? null,
+            'is_paid'        => $statusId === '1',
+            'is_pending'     => $statusId === '2',
+            'is_failed'      => $statusId === '3',
         ];
     }
 

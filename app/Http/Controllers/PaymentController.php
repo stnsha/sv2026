@@ -96,7 +96,7 @@ class PaymentController extends Controller
             if ($data['is_paid']) {
                 $this->bookingService->confirmBooking(
                     $booking,
-                    $data['order_id'] ?? '',
+                    $data['transaction_id'] ?? '',
                     new DateTime()
                 );
             } elseif ($data['is_pending']) {
