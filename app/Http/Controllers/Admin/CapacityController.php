@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\CapacityBookingsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Date;
 use App\Models\Table;
@@ -10,6 +11,8 @@ use App\Services\CapacityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CapacityController extends Controller
 {
@@ -60,6 +63,13 @@ class CapacityController extends Controller
             'dateFilterOptions' => $dateFilterOptions,
             'timeSlotFilterOptions' => $timeSlotFilterOptions,
         ]);
+    }
+
+    public function export(Date $date, TimeSlot $timeSlot): BinaryFileResponse
+    {
+        $filename = 'bookings_' . $date->date_value->format('Y-m-d') . '_' . $timeSlot->start_time->format('Hi') . '.csv';
+
+        return Excel::download(new CapacityBookingsExport($date, $timeSlot), $filename, \Maatwebsite\Excel\Excel::CSV);
     }
 
     public function edit(Date $date, TimeSlot $timeSlot): View

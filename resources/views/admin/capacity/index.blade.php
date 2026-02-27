@@ -126,6 +126,10 @@
                                            class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                                             View Bookings
                                         </a>
+                                        <a href="{{ route('admin.capacity.export', ['date' => $date, 'timeSlot' => $timeSlot]) }}"
+                                           class="px-3 py-1.5 text-sm bg-success-600 text-white rounded-lg hover:bg-success-700">
+                                            Download CSV
+                                        </a>
                                         <a href="{{ route('admin.capacity.edit', ['date' => $date, 'timeSlot' => $timeSlot]) }}"
                                            class="px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
                                             Edit Tables
