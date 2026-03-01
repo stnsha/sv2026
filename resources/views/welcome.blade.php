@@ -111,25 +111,15 @@
                         {{-- Date Cards Grid --}}
                         <div class="flex-1 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
                             @foreach($dates as $index => $date)
-                            <label x-show="isDateVisible({{ $index }})" x-cloak
-                                   :class="isDateSoldOut({{ $date->id }}) ? 'cursor-not-allowed' : 'cursor-pointer'">
+                            <label x-show="isDateVisible({{ $index }})" x-cloak class="cursor-pointer">
                                 <input type="radio" name="date_id" value="{{ $date->id }}"
                                        :checked="selectedDate == '{{ $date->id }}'"
                                        @change="onDateChange({{ $date->id }})"
-                                       :disabled="isDateSoldOut({{ $date->id }})"
                                        class="sr-only peer">
-                                <div class="py-3 px-2 rounded-xl flex flex-col items-center justify-center transition-all shadow-md bg-white hover:shadow-lg relative"
-                                     :class="{
-                                         'peer-checked:shadow-lg peer-checked:bg-[#F1D9A9]': !isDateSoldOut({{ $date->id }}),
-                                         'opacity-50 grayscale': isDateSoldOut({{ $date->id }})
-                                     }">
+                                <div class="py-3 px-2 rounded-xl flex flex-col items-center justify-center transition-all shadow-md bg-white hover:shadow-lg peer-checked:shadow-lg peer-checked:bg-[#F1D9A9]">
                                     <span class="text-[10px] font-medium uppercase tracking-wide text-[#5B3924]">{{ $date->date_value->locale('ms')->isoFormat('ddd') }}</span>
                                     <span class="text-xl font-bold text-[#5B3924]">{{ $date->date_value->format('d') }}</span>
                                     <span class="text-[10px] text-[#5B3924]">{{ $date->date_value->locale('ms')->isoFormat('MMM') }}</span>
-                                    <span x-show="isDateSoldOut({{ $date->id }})"
-                                          class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
-                                        Habis
-                                    </span>
                                 </div>
                             </label>
                             @endforeach
@@ -304,7 +294,6 @@
                 },
                 slotAvailability: @json($slotAvailability),
                 slotMinimumPax: @json($slotMinimumPax),
-                soldOutDates: @json($soldOutDates),
                 dateLabels: {
                     @foreach($dates as $date)
                         {{ $date->id }}: "{{ $date->date_value->locale('ms')->isoFormat('dddd, D MMM YYYY') }}",
@@ -323,10 +312,6 @@
                             this.currentSlide = Math.max(0, this.totalSlides - 1);
                         }
                     });
-                },
-
-                isDateSoldOut(dateId) {
-                    return this.soldOutDates.includes(Number(dateId));
                 },
 
                 isSlotAvailable(slotId) {
@@ -353,9 +338,6 @@
                 },
 
                 onDateChange(dateId) {
-                    if (this.isDateSoldOut(dateId)) {
-                        return;
-                    }
                     this.selectedDate = String(dateId);
 
                     // Auto-select first available time slot for new date

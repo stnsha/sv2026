@@ -17,15 +17,16 @@ use App\Services\TableAssignmentService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (TableAssignmentService $tableAssignmentService, CapacityService $capacityService) {
-    $dates = Date::orderBy('date_value')->get();
+    $today = now()->toDateString();
+    $allDates = Date::orderBy('date_value')->where('date_value', '>=', $today)->get();
     $timeSlots = TimeSlot::all();
     $prices = Price::all();
 
     $slotAvailability = [];
     $slotMinimumPax = [];
-    $soldOutDates = [];
+    $dates = collect();
 
-    foreach ($dates as $date) {
+    foreach ($allDates as $date) {
         $allSlotsSoldOut = true;
         foreach ($timeSlots as $timeSlot) {
             $availableTables = $tableAssignmentService->getAvailableTables($date->id, $timeSlot->id);
@@ -36,12 +37,12 @@ Route::get('/', function (TableAssignmentService $tableAssignmentService, Capaci
                 $allSlotsSoldOut = false;
             }
         }
-        if ($allSlotsSoldOut) {
-            $soldOutDates[] = $date->id;
+        if (!$allSlotsSoldOut) {
+            $dates->push($date);
         }
     }
 
-    return view('welcome', compact('dates', 'timeSlots', 'prices', 'slotAvailability', 'slotMinimumPax', 'soldOutDates'));
+    return view('welcome', compact('dates', 'timeSlots', 'prices', 'slotAvailability', 'slotMinimumPax'));
 });
 
 Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
