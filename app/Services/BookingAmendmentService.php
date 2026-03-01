@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 class BookingAmendmentService
 {
     public function __construct(
-        private TableAssignmentService $tableAssignmentService
+        private TableAssignmentService $tableAssignmentService,
+        private CapacityService $capacityService,
     ) {}
 
     public function checkAmendmentAvailability(
@@ -78,7 +79,9 @@ class BookingAmendmentService
             $booking,
             $availableTablesExcludingCurrent,
             $totalPax,
-            $currentTablesAvailable
+            $currentTablesAvailable,
+            $dateId,
+            $timeSlotId,
         );
 
         return [
@@ -105,7 +108,7 @@ class BookingAmendmentService
                 $tablesToAssign = Table::whereIn('id', $tableIds)->get();
             } else {
                 $availableTables = $this->getAvailableTablesExcludingBooking($booking, $dateId, $timeSlotId);
-                $optimalResult = $this->findOptimalTablesFromCollection($availableTables, $totalPax);
+                $optimalResult = $this->findOptimalTablesFromCollection($availableTables, $totalPax, $dateId, $timeSlotId);
 
                 if ($optimalResult === null) {
                     return false;
@@ -209,7 +212,7 @@ class BookingAmendmentService
                                 ->orderBy('capacity', 'desc')
                                 ->get();
 
-                            $replacement = $this->findOptimalTablesFromCollection($available, $shortfall);
+                            $replacement = $this->findOptimalTablesFromCollection($available, $shortfall, $booking->date_id, $booking->time_slot_id);
 
                             if ($replacement !== null) {
                                 foreach ($replacement['tables'] as $table) {
@@ -249,13 +252,15 @@ class BookingAmendmentService
         Booking $booking,
         Collection $availableTables,
         int $totalPax,
-        bool $currentTablesAvailable
+        bool $currentTablesAvailable,
+        int $dateId,
+        int $timeSlotId,
     ): array {
         if ($currentTablesAvailable) {
             return $booking->tableBookings->pluck('table_id')->toArray();
         }
 
-        $optimalResult = $this->findOptimalTablesFromCollection($availableTables, $totalPax);
+        $optimalResult = $this->findOptimalTablesFromCollection($availableTables, $totalPax, $dateId, $timeSlotId);
 
         if ($optimalResult === null) {
             return [];
@@ -306,7 +311,7 @@ class BookingAmendmentService
             ->get();
     }
 
-    private function findOptimalTablesFromCollection($availableTables, int $totalPax): ?array
+    private function findOptimalTablesFromCollection($availableTables, int $totalPax, int $dateId, int $timeSlotId): ?array
     {
         $sixSeaters = $availableTables->where('capacity', 6)->values();
         $fourSeaters = $availableTables->where('capacity', 4)->values();
@@ -314,11 +319,18 @@ class BookingAmendmentService
         $maxSixSeaters = $sixSeaters->count();
         $maxFourSeaters = $fourSeaters->count();
 
+        $allow2Pax = $this->capacityService->getEffectiveMinimumPax($dateId, $timeSlotId) <= 2;
+
         $bestCombination = null;
         $minWaste = PHP_INT_MAX;
         $minTables = PHP_INT_MAX;
 
         for ($numSix = 0; $numSix <= $maxSixSeaters; $numSix++) {
+            // 6-seater tables are only opened for parties of 5 pax and above,
+            // unless the slot allows 2-pax bookings (minimum_pax <= 2)
+            if ($numSix > 0 && $totalPax <= 4 && !$allow2Pax) {
+                continue;
+            }
             for ($numFour = 0; $numFour <= $maxFourSeaters; $numFour++) {
                 $totalCapacity = ($numSix * 6) + ($numFour * 4);
 

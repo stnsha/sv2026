@@ -11,9 +11,14 @@ use Illuminate\Support\Collection;
 
 class TableAssignmentService
 {
+    public function __construct(
+        private CapacityService $capacityService,
+    ) {}
+
     public function findOptimalTables(int $totalPax, int $dateId, int $timeSlotId): ?array
     {
         $availableTables = $this->getAvailableTables($dateId, $timeSlotId);
+        $allow2Pax = $this->capacityService->getEffectiveMinimumPax($dateId, $timeSlotId) <= 2;
 
         $sixSeaters = $availableTables->where('effective_capacity', 6)->values();
         $fourSeaters = $availableTables->where('effective_capacity', 4)->values();
@@ -28,6 +33,11 @@ class TableAssignmentService
         $minTables = PHP_INT_MAX;
 
         for ($numSix = 0; $numSix <= $maxSixSeaters; $numSix++) {
+            // 6-seater tables are only opened for parties of 5 pax and above,
+            // unless the slot allows 2-pax bookings (minimum_pax <= 2)
+            if ($numSix > 0 && $totalPax <= 4 && !$allow2Pax) {
+                continue;
+            }
             for ($numFour = 0; $numFour <= $maxFourSeaters; $numFour++) {
                 for ($numTwo = 0; $numTwo <= $maxTwoSeaters; $numTwo++) {
                     $totalCapacity = ($numSix * 6) + ($numFour * 4) + ($numTwo * 2);
