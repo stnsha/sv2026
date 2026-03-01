@@ -25,7 +25,11 @@ class CapacityController extends Controller
         $sortDirection = $request->input('sort', 'asc');
         $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
 
-        $datesQuery = Date::query()->orderBy('date_value', $sortDirection);
+        $today = now()->toDateString();
+
+        $datesQuery = Date::query()
+            ->orderByRaw('CASE WHEN date_value < ? THEN 1 ELSE 0 END', [$today])
+            ->orderBy('date_value', $sortDirection);
 
         if ($request->filled('date')) {
             $datesQuery->where('id', $request->input('date'));

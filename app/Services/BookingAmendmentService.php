@@ -134,6 +134,109 @@ class BookingAmendmentService
         });
     }
 
+    public function updateBookingStatus(Booking $booking, int $newStatus, string $transactionRefNo): array
+    {
+        $booking->load(['details', 'tableBookings.table']);
+
+        return DB::transaction(function () use ($booking, $newStatus, $transactionRefNo) {
+            $reassigned = false;
+
+            $activeStatuses = [
+                Booking::STATUS_INITIATED,
+                Booking::STATUS_PENDING_PAYMENT,
+                Booking::STATUS_CONFIRMED,
+            ];
+
+            if (in_array($newStatus, $activeStatuses)) {
+                if ($booking->tableBookings->isEmpty()) {
+                    // Tables were released (payment failed / cancelled) — assign from scratch
+                    $totalPax = $booking->details->sum('quantity');
+                    $result = $this->tableAssignmentService->findOptimalTables(
+                        $totalPax,
+                        $booking->date_id,
+                        $booking->time_slot_id
+                    );
+
+                    if ($result !== null) {
+                        foreach ($result['tables'] as $table) {
+                            TableBooking::create([
+                                'booking_id'   => $booking->id,
+                                'date_id'      => $booking->date_id,
+                                'time_slot_id' => $booking->time_slot_id,
+                                'table_id'     => $table->id,
+                            ]);
+                        }
+                        $reassigned = true;
+                    }
+                } else {
+                    // Has existing table_bookings — check for conflicts with other active bookings
+                    $currentTableIds = $booking->tableBookings->pluck('table_id')->toArray();
+
+                    $conflictingTableIds = TableBooking::query()
+                        ->where('date_id', $booking->date_id)
+                        ->where('time_slot_id', $booking->time_slot_id)
+                        ->where('booking_id', '!=', $booking->id)
+                        ->whereIn('table_id', $currentTableIds)
+                        ->whereHas('booking', fn ($q) => $q->whereIn('status', $activeStatuses))
+                        ->pluck('table_id')
+                        ->toArray();
+
+                    if (!empty($conflictingTableIds)) {
+                        TableBooking::query()
+                            ->where('booking_id', $booking->id)
+                            ->whereIn('table_id', $conflictingTableIds)
+                            ->delete();
+
+                        $booking->load('tableBookings.table');
+
+                        $totalPax = $booking->details->sum('quantity');
+                        $assignedCapacity = $booking->tableBookings->sum(fn ($tb) => $tb->table->capacity);
+                        $shortfall = $totalPax - $assignedCapacity;
+
+                        if ($shortfall > 0) {
+                            $alreadyAssignedTableIds = $booking->tableBookings->pluck('table_id')->toArray();
+
+                            $available = Table::query()
+                                ->whereNotIn('id', function ($sub) use ($booking, $activeStatuses) {
+                                    $sub->select('table_id')
+                                        ->from('table_bookings')
+                                        ->join('bookings', 'bookings.id', '=', 'table_bookings.booking_id')
+                                        ->where('table_bookings.date_id', $booking->date_id)
+                                        ->where('table_bookings.time_slot_id', $booking->time_slot_id)
+                                        ->whereIn('bookings.status', $activeStatuses);
+                                })
+                                ->whereNotIn('id', $alreadyAssignedTableIds)
+                                ->orderBy('capacity', 'desc')
+                                ->get();
+
+                            $replacement = $this->findOptimalTablesFromCollection($available, $shortfall);
+
+                            if ($replacement !== null) {
+                                foreach ($replacement['tables'] as $table) {
+                                    TableBooking::create([
+                                        'booking_id'   => $booking->id,
+                                        'date_id'      => $booking->date_id,
+                                        'time_slot_id' => $booking->time_slot_id,
+                                        'table_id'     => $table->id,
+                                    ]);
+                                }
+                            }
+                        }
+
+                        $reassigned = true;
+                    }
+                }
+            }
+
+            $booking->update([
+                'status'                  => $newStatus,
+                'transaction_reference_no' => $transactionRefNo,
+            ]);
+
+            return ['success' => true, 'reassigned' => $reassigned];
+        });
+    }
+
     public function getAvailableTablesForAmendment(
         Booking $booking,
         int $dateId,

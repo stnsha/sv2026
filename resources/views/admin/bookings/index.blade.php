@@ -40,8 +40,18 @@
                     \App\Models\Booking::STATUS_PAYMENT_FAILED => 'Payment Failed',
                 ],
             ],
+            [
+                'name' => 'date',
+                'placeholder' => 'All Dates',
+                'options' => $dateFilterOptions,
+            ],
+            [
+                'name' => 'time_slot',
+                'placeholder' => 'All Slots',
+                'options' => $timeSlotFilterOptions,
+            ],
         ]"
-        searchPlaceholder="Search customer name or email..."
+        searchPlaceholder="Search name or reference no..."
     />
 
     <!-- Bookings List -->
@@ -54,19 +64,17 @@
             <table class="min-w-full divide-y divide-grey-200">
                 <thead class="bg-grey-50">
                     <tr>
+                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden lg:table-cell">
+                            Reference
+                        </th>
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">
                             Customer
                         </th>
-                        <th class="px-4 lg:px-6 py-3 text-left">
-                            <x-sortable-header
-                                column="created_at"
-                                label="Date"
-                                :currentSort="$currentSort"
-                                :currentDirection="$currentDirection"
-                            />
+                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden md:table-cell">
+                            Date
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider hidden md:table-cell">
-                            Time
+                            Slot
                         </th>
                         <th class="px-4 lg:px-6 py-3 text-left">
                             <x-sortable-header
@@ -93,11 +101,14 @@
                 <tbody class="bg-white divide-y divide-grey-200">
                     @forelse($bookings as $booking)
                         <tr class="hover:bg-grey-50">
+                            <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-xs text-grey-500 font-mono hidden lg:table-cell">
+                                {{ $booking->reference_id }}
+                            </td>
                             <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-grey-900">{{ $booking->customer->name }}</div>
                                 <div class="text-xs text-grey-500">{{ $booking->customer->email }}</div>
                             </td>
-                            <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-grey-600">
+                            <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-grey-600 hidden md:table-cell">
                                 {{ $booking->date->formatted_date }}
                             </td>
                             <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-grey-600 hidden md:table-cell">
@@ -140,7 +151,7 @@
                                 RM {{ number_format($booking->total, 2) }}
                             </td>
                             <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('admin.bookings.show', $booking) }}"
+                                <a href="{{ route('admin.bookings.show', [$booking, 'from' => 'bookings']) }}"
                                    class="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                                     View
                                 </a>
@@ -148,7 +159,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 lg:px-6 py-8 text-center text-grey-500">
+                            <td colspan="7" class="px-4 lg:px-6 py-8 text-center text-grey-500">
                                 No bookings found
                             </td>
                         </tr>

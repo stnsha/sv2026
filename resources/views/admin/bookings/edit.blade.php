@@ -7,11 +7,17 @@
 @section('content')
     <div x-data="amendBookingForm()" class="space-y-6">
         <div class="flex justify-between items-center">
-            <a href="{{ route('admin.capacity.index') }}" class="px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
-                Back to Capacity
-            </a>
+            @if(request()->query('from') === 'bookings')
+                <a href="{{ route('admin.bookings.index') }}" class="px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
+                    Back to Bookings
+                </a>
+            @else
+                <a href="{{ route('admin.capacity.index') }}" class="px-3 py-1.5 text-sm bg-grey-600 text-white rounded-lg hover:bg-grey-700">
+                    Back to Capacity
+                </a>
+            @endif
             <div class="flex gap-3">
-                <a href="{{ route('admin.bookings.show', $booking) }}"
+                <a href="{{ route('admin.bookings.show', [$booking, 'from' => request()->query('from')]) }}"
                    class="px-4 py-2 bg-grey-600 text-white rounded-lg hover:bg-grey-700">
                     Cancel
                 </a>
@@ -60,6 +66,9 @@
         <form x-ref="amendForm" action="{{ route('admin.bookings.update', $booking) }}" method="POST" @submit.prevent="confirmAmendment">
             @csrf
             @method('PUT')
+            @if(request()->query('from'))
+                <input type="hidden" name="from" value="{{ request()->query('from') }}">
+            @endif
 
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h2 class="text-xl font-semibold text-grey-900 mb-4">New Date & Time</h2>

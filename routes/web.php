@@ -64,6 +64,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
     Route::get('/bookings/{booking}/edit', [AdminBookingController::class, 'edit'])->name('bookings.edit');
     Route::put('/bookings/{booking}', [AdminBookingController::class, 'update'])->name('bookings.update');
+    Route::patch('/bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.update-status');
     Route::post('/bookings/{booking}/check-amendment-availability', [AdminBookingController::class, 'checkAmendmentAvailability'])->name('bookings.check-amendment-availability');
     Route::get('/capacity', [CapacityController::class, 'index'])->name('capacity.index');
     Route::get('/capacity/{date}/{timeSlot}/export', [CapacityController::class, 'export'])->name('capacity.export');

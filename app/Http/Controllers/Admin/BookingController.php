@@ -27,20 +27,27 @@ class BookingController extends Controller
         $query = Booking::query()
             ->with(['customer', 'date', 'timeSlot']);
 
-        // Search filter (applies to customer name/email)
         if ($search = $request->input('search')) {
-            $query->whereHas('customer', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('reference_id', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
-        // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
         }
 
-        // Sorting
+        if ($request->filled('date')) {
+            $query->where('date_id', $request->input('date'));
+        }
+
+        if ($request->filled('time_slot')) {
+            $query->where('time_slot_id', $request->input('time_slot'));
+        }
+
         $sortColumn = $request->input('sort', 'created_at');
         $sortDirection = $request->input('direction', 'desc');
         $allowedSorts = ['created_at', 'total', 'status'];
@@ -51,7 +58,7 @@ class BookingController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $bookings = $query->paginate(10)->withQueryString();
+        $bookings = $query->paginate(15)->withQueryString();
 
         $totalBookings = Booking::count();
 
@@ -67,12 +74,17 @@ class BookingController extends Controller
             ->whereIn('status', [Booking::STATUS_CANCELLED, Booking::STATUS_PAYMENT_FAILED])
             ->count();
 
+        $dateFilterOptions = Date::orderBy('date_value')->get()->pluck('formatted_date', 'id')->toArray();
+        $timeSlotFilterOptions = TimeSlot::all()->pluck('formatted_time', 'id')->toArray();
+
         return view('admin.bookings.index', [
             'bookings' => $bookings,
             'totalBookings' => $totalBookings,
             'confirmedBookings' => $confirmedBookings,
             'pendingBookings' => $pendingBookings,
             'cancelledBookings' => $cancelledBookings,
+            'dateFilterOptions' => $dateFilterOptions,
+            'timeSlotFilterOptions' => $timeSlotFilterOptions,
             'currentSort' => $sortColumn,
             'currentDirection' => $sortDirection,
         ]);
@@ -192,9 +204,37 @@ class BookingController extends Controller
                 ->with('error', 'Failed to amend booking. Please try again.');
         }
 
+        $from = $request->input('from');
+
         return redirect()
-            ->route('admin.bookings.show', $booking)
+            ->route('admin.bookings.show', array_filter([$booking->getRouteKey(), 'from' => $from]))
             ->with('success', 'Booking successfully amended.');
+    }
+
+    public function updateStatus(Request $request, Booking $booking): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status'                  => 'required|integer|in:0,1,2,3,4',
+            'transaction_reference_no' => 'required|string|max:255',
+        ]);
+
+        $result = $this->bookingAmendmentService->updateBookingStatus(
+            $booking,
+            (int) $validated['status'],
+            $validated['transaction_reference_no']
+        );
+
+        $from = $request->input('from');
+        $redirectParams = $from ? [$booking, 'from' => $from] : $booking;
+
+        $message = 'Booking status updated successfully.';
+        if ($result['reassigned']) {
+            $message .= ' Some tables were automatically reassigned due to conflicts.';
+        }
+
+        return redirect()
+            ->route('admin.bookings.show', $redirectParams)
+            ->with('success', $message);
     }
 
     public function checkAmendmentAvailability(Request $request, Booking $booking): JsonResponse
