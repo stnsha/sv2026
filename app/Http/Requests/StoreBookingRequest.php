@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Price;
 use App\Services\CapacityService;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -67,6 +68,21 @@ class StoreBookingRequest extends FormRequest
 
             if ($totalPax > 192) {
                 $validator->errors()->add('pax_details', 'Maximum capacity is 192 guests.');
+            }
+
+            $paxDetails = $this->input('pax_details', []);
+            $priceIds   = collect($paxDetails)->pluck('price_id');
+            $prices     = Price::whereIn('id', $priceIds)->get()->keyBy('id');
+
+            foreach ($paxDetails as $detail) {
+                if (($detail['quantity'] ?? 0) <= 0) {
+                    continue;
+                }
+                $price = $prices->get($detail['price_id']);
+                if (!$price || !$price->is_active) {
+                    $validator->errors()->add('pax_details', 'One or more selected price categories are unavailable.');
+                    return;
+                }
             }
         });
     }

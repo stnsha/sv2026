@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\CapacityController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PriceController as AdminPriceController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
@@ -20,7 +21,7 @@ Route::get('/', function (TableAssignmentService $tableAssignmentService, Capaci
     $today = now()->toDateString();
     $allDates = Date::orderBy('date_value')->where('date_value', '>=', $today)->get();
     $timeSlots = TimeSlot::all();
-    $prices = Price::all();
+    $prices = Price::active()->get();
 
     $slotAvailability = [];
     $slotMinimumPax = [];
@@ -71,6 +72,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/capacity/{date}/{timeSlot}/export', [CapacityController::class, 'export'])->name('capacity.export');
     Route::get('/capacity/{date}/{timeSlot}/edit', [CapacityController::class, 'edit'])->name('capacity.edit');
     Route::put('/capacity/{date}/{timeSlot}', [CapacityController::class, 'update'])->name('capacity.update');
+    Route::get('/prices', [AdminPriceController::class, 'index'])->name('prices.index');
+    Route::put('/prices', [AdminPriceController::class, 'update'])->name('prices.update');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 

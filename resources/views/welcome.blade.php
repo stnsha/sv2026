@@ -47,6 +47,7 @@
                 </div>
 
                 {{-- Pricing Cards --}}
+                @php $kanakCount = $prices->where('category', 'Kanak-kanak')->count(); @endphp
                 <div class="mb-6">
                     <h2 class="sr-only">Harga Tiket</h2>
                     <div class="grid grid-cols-3 gap-3">
@@ -62,7 +63,7 @@
                                 @endif
                             </div>
                             <p class="text-[12px] md:text-[14px] font-medium text-[#5B3924] tracking-[0.05em]">{{ $price->category }}</p>
-                            @if($price->category === 'Kanak-kanak' && $price->description)
+                            @if($price->category === 'Kanak-kanak' && $price->description && $kanakCount > 1)
                                 <p class="text-[10px] md:text-[11px] text-[#5B3924] mt-0.5 opacity-70">({{ $price->description }})</p>
                             @endif
                             <div class="flex items-start justify-center gap-0.5 mt-1">
@@ -177,7 +178,7 @@
 
                     @foreach($prices as $index => $price)
                     <div class="flex items-center justify-between rounded-lg p-3 shadow-md" style="background-color: #FFFFFF;">
-                        <span class="text-[14px] font-medium text-[#5B3924]">{{ $price->category }}{{ $price->category === 'Kanak-kanak' && $price->description ? ' (' . $price->description . ')' : '' }}</span>
+                        <span class="text-[14px] font-medium text-[#5B3924]">{{ $price->category }}{{ $price->category === 'Kanak-kanak' && $price->description && $kanakCount > 1 ? ' (' . $price->description . ')' : '' }}</span>
                         <div class="flex items-center gap-3">
                             <input type="hidden" name="pax_details[{{ $index }}][price_id]" value="{{ $price->id }}">
                             <div class="flex items-center">

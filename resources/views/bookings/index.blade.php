@@ -50,17 +50,18 @@
             <div>
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Number of Guests</h2>
 
+                @php $kanakCount = $prices->where('category', 'Kanak-kanak')->count(); @endphp
                 @foreach($prices as $index => $price)
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ $price->category }}{{ $price->description ? ' (' . $price->description . ')' : '' }} (RM {{ number_format($price->amount, 2) }})
+                            {{ $price->category }}{{ $price->category === 'Kanak-kanak' && $price->description && $kanakCount > 1 ? ' (' . $price->description . ')' : '' }} (RM {{ number_format($price->amount, 2) }})
                         </label>
                         <input type="hidden" name="pax_details[{{ $index }}][price_id]" value="{{ $price->id }}">
                         <input type="number" name="pax_details[{{ $index }}][quantity]" id="pax_{{ $price->id }}"
                                class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 pax-input"
                                data-price="{{ $price->amount }}"
                                data-extra-chair="{{ $price->extra_chair ? '1' : '0' }}"
-                               value="{{ old('pax_details.' . $index . '.quantity', 0) }}" min="0">
+value="{{ old('pax_details.' . $index . '.quantity', 0) }}" min="0">
                     </div>
                 @endforeach
 

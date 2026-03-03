@@ -26,7 +26,7 @@ class BookingController extends Controller
     {
         $dates = Date::orderBy('date_value')->get();
         $timeSlots = TimeSlot::all();
-        $prices = Price::all();
+        $prices = Price::active()->get();
 
         return view('bookings.index', compact('dates', 'timeSlots', 'prices'));
     }
