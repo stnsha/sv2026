@@ -49,6 +49,12 @@
                         </span>
                 @endswitch
 
+                <form action="{{ route('admin.bookings.resend-email', array_filter([$booking->getRouteKey(), 'from' => request()->query('from')])) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 bg-grey-600 text-white text-sm font-medium rounded-lg hover:bg-grey-700">
+                        Resend Email
+                    </button>
+                </form>
                 <button
                     type="button"
                     @click="editStatusOpen = true"

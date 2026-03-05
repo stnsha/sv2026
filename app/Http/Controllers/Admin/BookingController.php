@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AmendBookingRequest;
+use App\Mail\BookingInvoice;
 use App\Models\Booking;
 use App\Models\Date;
 use App\Models\Table;
@@ -13,6 +14,7 @@ use App\Services\TableAssignmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -235,6 +237,20 @@ class BookingController extends Controller
         return redirect()
             ->route('admin.bookings.show', $redirectParams)
             ->with('success', $message);
+    }
+
+    public function resendEmail(Request $request, Booking $booking): RedirectResponse
+    {
+        $booking->load(['customer', 'date', 'timeSlot', 'details.price', 'tableBookings.table']);
+
+        Mail::to($booking->customer->email)->send(new BookingInvoice($booking));
+
+        $from = $request->input('from');
+        $redirectParams = $from ? [$booking, 'from' => $from] : $booking;
+
+        return redirect()
+            ->route('admin.bookings.show', $redirectParams)
+            ->with('success', 'Invoice email resent to ' . $booking->customer->email);
     }
 
     public function checkAmendmentAvailability(Request $request, Booking $booking): JsonResponse
